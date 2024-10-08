@@ -15,7 +15,7 @@ Download the `Social Distancing Data Analysis Code.R` file, load the necessary l
 
 ### Results in Section 5 (Simulation Studies)
   
-Download the `Bias Reduction for Matching with Continuous Treatments Simulation code.R` file, load the necessary libraries and functions, then run the simulations in the Main Simulation section. Specifically, run the `Simulation 1 Estimation and Inference (MAE, RMSE, ML, CR)` and the `Simulation 2 Estimation and Inference (MAE, RMSE, ML, CR)`chunks of code to replicate results shown in tables 1 and 2 of the main manuscript. You may run the `Simulation Result Tables` chunk of code to produce a \LaTeX table showing the MAE, RMSE, ML and CR results combined. 
+Download the `Bias Reduction for Matching with Continuous Treatments Simulation code.R` file, load the necessary libraries and functions, then run the simulations in the Main Simulation section. Specifically, run the `Simulation 1 Estimation and Inference (MAE, RMSE, ML, CR)` and the `Simulation 2 Estimation and Inference (MAE, RMSE, ML, CR)`chunks of code to replicate results shown in tables 1 and 2 of the main manuscript. You may run the `Simulation Result Tables` chunk of code to produce a LaTeX table showing the MAE, RMSE, ML and CR results combined. 
 
 ### Results in Section 6 (Data Application: Re-Analyzing the Effects of Social Distancing Practice On COVID-19 Case Counts)
 
