@@ -1,5 +1,5 @@
 ################################################################################
-####           Mitigating Bias in Matched Observational Studies             ####
+####           Bias Mitigation in Matched Observational Studies             ####
 ####                    with Continuous Treatments                          ####
 ####                        Simulation Code                                 ####
 ####                Anthony Frazier, Siyu Heng, Wen Zhou                    ####
@@ -72,6 +72,7 @@ coverage_check <- function(CI, parameter){
 #### propensity_matrix_RFCDE: estimates the probability of observed
 # treatment assignment for all pairs of observations. Uses RFCDE package.
 
+# for main manuscript
 generate_data_dose <- function(N){
   # integer N: determines number of observations generated 
   
@@ -89,67 +90,6 @@ generate_data_dose <- function(N){
   # Place variables in a dataframe
   data = data.frame("Z" = z, "Y" = y, "X1" = x1, "X2" = x2, 
                     "X3" = x3, "X4" = x4, "X5" = x5)
-  
-  return(data)
-}
-generate_data_uniform <- function(N){
-  # integer N: determines number of observations generated 
-  
-  # Generate covariates
-  x1 = runif(N, -1, 1); x2 = runif(N, -1, 1); x3 = runif(N, -1, 1); x4 = runif(N, -1, 1); x5 = runif(N, -1, 1);
-  
-  # Generate treatment variable
-  error1 = rnorm(N, 0, 1)
-  z = x1 + x2^2 + abs(x3 * x4) + ifelse(x4 > 0, 1, 0) + log(1 + abs(x5)) + error1
-  
-  # Generate outcome variable
-  error2 = rnorm(N, 0, 3)
-  y = z + 0.3*x1*z + 0.2*x3^3*z + exp(abs(x2 - x4)) - sin(x5) + error2
-  
-  # Place variables in a dataframe
-  data = data.frame("Z" = z, "Y" = y, "X1" = x1, "X2" = x2, 
-                    "X3" = x3, "X4" = x4, "X5" = x5)
-  
-  return(data)
-}
-generate_data_logistic <- function(N){
-  # integer N: determines number of observations generated 
-  
-  # Generate covariates
-  x1 = rlogis(N); x2 = rlogis(N); x3 = rlogis(N); x4 = rlogis(N); x5 = rlogis(N);
-  
-  # Generate treatment variable
-  error1 = rnorm(N, 0, 1)
-  z = x1 + x2^2 + abs(x3 * x4) + ifelse(x4 > 0, 1, 0) + log(1 + abs(x5)) + error1
-  
-  # Generate outcome variable
-  error2 = rnorm(N, 0, 3)
-  y = z + 0.3*x1*z + 0.2*x3^3*z + exp(abs(x2 - x4)) - sin(x5) + error2
-  
-  # Place variables in a dataframe
-  data = data.frame("Z" = z, "Y" = y, "X1" = x1, "X2" = x2, 
-                    "X3" = x3, "X4" = x4, "X5" = x5)
-  
-  return(data)
-}
-generate_data_dose_2 <- function(N){
-  # integer N: determines number of observations generated 
-  
-  # Generate covariates
-  x1 = rbinom(N, 1, 0.5); x2 = rbinom(N, 10, 0.75); x3 = rpois(N, 1.5); x4 = runif(N, 0, 3); x5 = runif(N, -1, 1); x6 = runif(N, -5, 5);
-  
-  # Generate treatment variable
-  error1 = rnorm(N)
-  z = ifelse(x1 == 1 & x2 > 5, 4, 0) - x1 + x3 + (sin(x5))^2 + 2*log(1 + x4) + 2*exp(-abs(x6)) + error1
-  
-  # Generate outcome variable
-  error2 = rnorm(N, 0, 3)
-  
-  y = z + 0.3*x6*z + x5^3*z + ifelse(x1 == 1, x3*(x4 + 1.5), x3) - 0.2*x4*abs(x5) + x2 + error2
-  
-  # Place variables in a dataframe
-  data = data.frame("Z" = z, "Y" = y, "X1" = x1, "X2" = x2, 
-                    "X3" = x3, "X4" = x4, "X5" = x5, "X6" = x6)
   
   return(data)
 }
@@ -363,6 +303,69 @@ propensity_matrix_model <- function(data){
   return(p_matrix)
 }
 
+# for supplementary materials
+generate_data_uniform <- function(N){
+  # integer N: determines number of observations generated 
+  
+  # Generate covariates
+  x1 = runif(N, -1, 1); x2 = runif(N, -1, 1); x3 = runif(N, -1, 1); x4 = runif(N, -1, 1); x5 = runif(N, -1, 1);
+  
+  # Generate treatment variable
+  error1 = rnorm(N, 0, 1)
+  z = x1 + x2^2 + abs(x3 * x4) + ifelse(x4 > 0, 1, 0) + log(1 + abs(x5)) + error1
+  
+  # Generate outcome variable
+  error2 = rnorm(N, 0, 3)
+  y = z + 0.3*x1*z + 0.2*x3^3*z + exp(abs(x2 - x4)) - sin(x5) + error2
+  
+  # Place variables in a dataframe
+  data = data.frame("Z" = z, "Y" = y, "X1" = x1, "X2" = x2, 
+                    "X3" = x3, "X4" = x4, "X5" = x5)
+  
+  return(data)
+}
+generate_data_logistic <- function(N){
+  # integer N: determines number of observations generated 
+  
+  # Generate covariates
+  x1 = rlogis(N); x2 = rlogis(N); x3 = rlogis(N); x4 = rlogis(N); x5 = rlogis(N);
+  
+  # Generate treatment variable
+  error1 = rnorm(N, 0, 1)
+  z = x1 + x2^2 + abs(x3 * x4) + ifelse(x4 > 0, 1, 0) + log(1 + abs(x5)) + error1
+  
+  # Generate outcome variable
+  error2 = rnorm(N, 0, 3)
+  y = z + 0.3*x1*z + 0.2*x3^3*z + exp(abs(x2 - x4)) - sin(x5) + error2
+  
+  # Place variables in a dataframe
+  data = data.frame("Z" = z, "Y" = y, "X1" = x1, "X2" = x2, 
+                    "X3" = x3, "X4" = x4, "X5" = x5)
+  
+  return(data)
+}
+generate_data_dose_2 <- function(N){
+  # integer N: determines number of observations generated 
+  
+  # Generate covariates
+  x1 = rbinom(N, 1, 0.5); x2 = rbinom(N, 10, 0.75); x3 = rpois(N, 1.5); x4 = runif(N, 0, 3); x5 = runif(N, -1, 1); x6 = runif(N, -5, 5);
+  
+  # Generate treatment variable
+  error1 = rnorm(N)
+  z = ifelse(x1 == 1 & x2 > 5, 4, 0) - x1 + x3 + (sin(x5))^2 + 2*log(1 + x4) + 2*exp(-abs(x6)) + error1
+  
+  # Generate outcome variable
+  error2 = rnorm(N, 0, 3)
+  
+  y = z + 0.7*x6*z + 2*x5^3*z + ifelse(x1 == 1, x3*(2*x4 + 1), x3) + 0.5*x4*abs(x5) + x2 + error2
+  
+  # Place variables in a dataframe
+  data = data.frame("Z" = z, "Y" = y, "X1" = x1, "X2" = x2, 
+                    "X3" = x3, "X4" = x4, "X5" = x5, "X6" = x6)
+  
+  return(data)
+}
+
 #### Matching Methods ----------------------------------------------------------
 # this section lists the different matching algorithms we compare in our 
 # simulation. 
@@ -542,13 +545,13 @@ true_lambda_2 <- function(data, pairs){
     # within each matched pair, we calculate the potential outcome for each 
     # observation under each observed treatment dose (within that matched pair).
     
-    high_cf_high <- data[pairs[i, 1], 1] + 0.3*data[pairs[i, 1], 8]*data[pairs[i, 1], 1] + (data[pairs[i, 1], 7]^3)*data[pairs[i, 1], 1] + ifelse(data[pairs[i, 1], 3] == 1, data[pairs[i, 1], 5]*(data[pairs[i, 1], 6] + 1.5), data[pairs[i, 1], 5]) - 0.2*data[pairs[i, 1], 6]*abs(data[pairs[i, 1], 7]) + data[pairs[i, 1], 4]
+    high_cf_high <- data[pairs[i, 1], 1] + 0.7*data[pairs[i, 1], 8]*data[pairs[i, 1], 1] + 2*(data[pairs[i, 1], 7]^3)*data[pairs[i, 1], 1] + ifelse(data[pairs[i, 1], 3] == 1, data[pairs[i, 1], 5]*(2*data[pairs[i, 1], 6] + 1), data[pairs[i, 1], 5]) + 0.5*data[pairs[i, 1], 6]*abs(data[pairs[i, 1], 7]) + data[pairs[i, 1], 4]
     
-    high_cf_low <- data[pairs[i, 2], 1] + 0.3*data[pairs[i, 1], 8]*data[pairs[i, 2], 1] + (data[pairs[i, 1], 7]^3)*data[pairs[i, 2], 1] + ifelse(data[pairs[i, 1], 3] == 1, data[pairs[i, 1], 5]*(data[pairs[i, 1], 6] + 1.5), data[pairs[i, 1], 5]) - 0.2*data[pairs[i, 1], 6]*abs(data[pairs[i, 1], 7]) + data[pairs[i, 1], 4]
+    high_cf_low <- data[pairs[i, 2], 1] + 0.7*data[pairs[i, 1], 8]*data[pairs[i, 2], 1] + 2*(data[pairs[i, 1], 7]^3)*data[pairs[i, 2], 1] + ifelse(data[pairs[i, 1], 3] == 1, data[pairs[i, 1], 5]*(2*data[pairs[i, 1], 6] + 1), data[pairs[i, 1], 5]) + 0.5*data[pairs[i, 1], 6]*abs(data[pairs[i, 1], 7]) + data[pairs[i, 1], 4]
     
-    low_cf_low <- data[pairs[i, 2], 1] + 0.3*data[pairs[i, 2], 8]*data[pairs[i, 2], 1] + (data[pairs[i, 2], 7])^3*data[pairs[i, 2], 1] + ifelse(data[pairs[i, 2], 3] == 1, data[pairs[i, 2], 5]*(data[pairs[i, 2], 6] + 1.5), data[pairs[i, 2], 5]) - 0.2*data[pairs[i, 2], 6]*abs(data[pairs[i, 2], 7]) + data[pairs[i, 2], 4]
+    low_cf_low <- data[pairs[i, 2], 1] + 0.7*data[pairs[i, 2], 8]*data[pairs[i, 2], 1] + 2*(data[pairs[i, 2], 7])^3*data[pairs[i, 2], 1] + ifelse(data[pairs[i, 2], 3] == 1, data[pairs[i, 2], 5]*(2*data[pairs[i, 2], 6] + 1), data[pairs[i, 2], 5]) + 0.5*data[pairs[i, 2], 6]*abs(data[pairs[i, 2], 7]) + data[pairs[i, 2], 4]
     
-    low_cf_high <- data[pairs[i, 1], 1] + 0.3*data[pairs[i, 2], 8]*data[pairs[i, 1], 1] + (data[pairs[i, 2], 7])^3*data[pairs[i, 1], 1] + ifelse(data[pairs[i, 2], 3] == 1, data[pairs[i, 2], 5]*(data[pairs[i, 2], 6] + 1.5), data[pairs[i, 2], 5]) - 0.2*data[pairs[i, 2], 6]*abs(data[pairs[i, 2], 7]) + data[pairs[i, 2], 4]
+    low_cf_high <- data[pairs[i, 1], 1] + 0.7*data[pairs[i, 2], 8]*data[pairs[i, 1], 1] + 2*(data[pairs[i, 2], 7])^3*data[pairs[i, 1], 1] + ifelse(data[pairs[i, 2], 3] == 1, data[pairs[i, 2], 5]*(2*data[pairs[i, 2], 6] + 1), data[pairs[i, 2], 5]) + 0.5*data[pairs[i, 2], 6]*abs(data[pairs[i, 2], 7]) + data[pairs[i, 2], 4]
     
     # calculates the numerator and denominator portions of lambda
     numerator[i] <- high_cf_high - high_cf_low + low_cf_high - low_cf_low
@@ -628,8 +631,6 @@ bias_corrected_estimator <- function(data, pairs, p_matrix, cutoff){
 #### variance_bias-corrected: calculates the conservative variance estimate for the
 # bias-corrected estimator. 
 
-#### CI_mike: creates CI based off of baiocchi 2010 (building a stronger instrument...)
-
 variance_naive <- function(data, pairs, estimate){
   
   # calculates a, centering constant that makes variance estimate least conservative
@@ -681,37 +682,13 @@ variance_bias_corrected <- function(data, pairs, p_matrix, estimate, cutoff){
   estimate <- ((sum(low_num) + sum(mid_num) + sum(high_num)) / denominator)*(nrow(pairs)/(nrow(pairs) - 1))
   return(estimate)
 }
-CI_mike <- function(data, pairs){
-  
-  num_t <- function(x){
-    sum((data[pairs[, 1], 2] - x*data[pairs[, 1], 1]) - (data[pairs[, 2], 2] - x*data[pairs[, 2], 1]))/nrow(pairs)
-  }
-  
-  denom_s2 <- function(x){
-    sum(((data[pairs[, 1], 2] - x*data[pairs[, 1], 1]) - (data[pairs[, 2], 2] - x*data[pairs[, 2], 1]) -  (sum((data[pairs[, 1], 2] - x*data[pairs[, 1], 1]) - (data[pairs[, 2], 2] - x*data[pairs[, 2], 1]))/nrow(pairs)))^2)/(nrow(pairs)*(nrow(pairs) - 1))
-  }
-  
-  lower_CI <- function(x){
-    num_t(x)/sqrt(denom_s2(x)) - 1.96
-  }
-  
-  upper_CI <- function(x){
-    num_t(x)/sqrt(denom_s2(x)) + 1.96
-  }
-  
-  low <- uniroot(lower_CI, lower = -100, upper = 100)$root
-  upp <- uniroot(upper_CI, lower = -100, upper = 100)$root
-  
-  return(c(low, upp))
-  
-}
+
 
 ################################################################################
 ####                        Main Simulation                                 ####
 ################################################################################
 
-#### Simulation 1:
-# Sim 1 Estimation and Inference (MAE, RMSE, ML, CR) -------------------------------
+# Simulation 1 Estimation and Inference (MAE, RMSE, ML, CR) -------------------------------
 set.seed(12345)
 iter = 1000
 sample_size <- 1000
@@ -1001,7 +978,7 @@ names(summary_data) <- c("Matching_Method", "Estimation_Method","Mean_Abs_Error"
 
 write.csv(summary_data, "sim_summary.csv")
 
-# Sim 1 P Distribution -----------------------------------------------------------
+# Simulation 1 P Distribution (supplementary materials) -----------------------------------------------------------
 
 # Parallelization setup
 numcores <- detectCores()
@@ -1086,9 +1063,7 @@ write.csv(average_histograms[2, ], "average_hist_linCDE.csv")
 write.csv(average_histograms[3, ], "average_hist_RFCDE.csv")
 write.csv(average_histograms[4, ], "average_hist_model.csv")
 
-
-#### Simulation 2:
-# Sim 2 Estimation and Inference (MAE, RMSE, ML, CR) -------------------------------
+# Simulation 2 Estimation and Inference (MAE, RMSE, ML, CR) -------------------------------
 set.seed(12345)
 iter = 1000
 sample_size <- 1000
@@ -1126,7 +1101,7 @@ while(successful_matching < iter){
   
 }
 
-write.csv(covariate_balance, "covariate_balance_sim2.csv")
+#write.csv(covariate_balance, "covariate_balance_sim2.csv")
 
 # Parallelization setup
 numcores <- detectCores()
@@ -1377,10 +1352,11 @@ for(i in 1:length(matching_method_vector)){
 summary_data[, -c(1, 2)] <- lapply(summary_data[, -c(1, 2)], as.numeric)
 summary_data[, 5] <- 2*summary_data[, 5]
 names(summary_data) <- c("Matching_Method", "Estimation_Method","Mean_Abs_Error", "RMSE", "Average_Length", "Coverage_Rate")
+summary_data
 
 write.csv(summary_data, "sim_summary2.csv")
 
-# Sim 2 P Distribution -----------------------------------------------------------
+# Simulation 2 P Distribution (supplementary materials) -----------------------------------------------------------
 
 # Parallelization setup
 numcores <- detectCores()
@@ -1466,7 +1442,10 @@ write.csv(average_histograms[4, ], "average_hist_model_sim2.csv")
 
 
 #### Simulation Tables and Plots:
+
+#### Results
 # Simulation Result Tables ----
+# creates table showing MAE, RMSE, Mean length and coverage results
 
 # summary_data <- read.csv("sim_summary.csv")[, -1]
 summary_data <- read.csv("sim_summary2.csv")[, -1]
@@ -1478,8 +1457,8 @@ kbl(table_data, align = 'c', booktabs = T, format = "latex", row.names = FALSE,
   kable_classic(full_width = F, html_font = "Cambria") %>%
   collapse_rows(columns = c(1), latex_hline = "custom",  valign = "middle")
 
-
 # Covariate Balance Tables ----
+# average covariate balance tables for both simulation settings. 
 
 balance_tab <- read.csv("covariate_balance_sim1.csv")[, -1]
 mean_balance <- data.frame(as.list(round_df(colMeans(balance_tab), 3)))
@@ -1494,8 +1473,9 @@ kbl(mean_balance, align = 'c', booktabs = T, format = "latex", row.names = FALSE
   kable_classic(full_width = F, html_font = "Cambria")
 
 # P Distribution Plots ----
+# average distribution of treatment assignment probabilities
 
-plot <- as.numeric(read.csv("average_hist_oracle.csv")[, -1])
+#plot <- as.numeric(read.csv("average_hist_oracle.csv")[, -1])
 ggplot()+
   geom_histogram(aes(x = plot), binwidth = 0.05, color = "black", fill = "white") + 
   theme_bw() +
@@ -1503,7 +1483,6 @@ ggplot()+
   labs(x = "", y = "") +
   theme(axis.text = element_text(size = 12))
 ggsave("P_distribution_oracle.png", width = 4.5, height = 3)
-
 
 
 ################################################################################
