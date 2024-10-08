@@ -233,6 +233,28 @@ caliper_analysis <- caliper_analysis[-3, ]
 write.csv(caliper_analysis, "main_caliper_analysis.csv")
 
 
+#### Balance table for original set of 1,211 matched pairs ---------------------
+
+bt <- read.csv("balance_table.csv")
+balance_df <- cbind(bt$Variable, abs(bt$standardized_difference))
+balance_df <- data.frame(balance_df)
+names(balance_df) <- c("Variable", "Standardized_difference")
+balance_df[, 2] <- as.numeric(balance_df[, 2])
+balance_df <- balance_df[order(balance_df$Standardized_difference, decreasing = TRUE), ]
+balance_df <- balance_df[-1, ]
+#top10_balance <- balance_df[1:10, ]
+
+ggplot(data = balance_df) + 
+  geom_point(aes(x = reorder(Variable, -Standardized_difference, decreasing = TRUE), y = Standardized_difference)) + 
+  coord_flip() + 
+  theme_bw() + 
+  labs(x = "Covariates", 
+       y = "Standardized Difference-in-means") +
+  theme(axis.text = element_text(size = 8),
+        axis.title = element_text(size = 9))
+
+
+
 ################################################################################
 ####                        Secondary Analysis                              ####
 ################################################################################
@@ -601,22 +623,3 @@ ggplot(data = std_long) +
         legend.title = element_text(size = 9),
         legend.text = element_text(size = 8)) +
   coord_flip()
-
-
-bt <- read.csv("balance_table.csv")
-balance_df <- cbind(bt$Variable, abs(bt$standardized_difference))
-balance_df <- data.frame(balance_df)
-names(balance_df) <- c("Variable", "Standardized_difference")
-balance_df[, 2] <- as.numeric(balance_df[, 2])
-balance_df <- balance_df[order(balance_df$Standardized_difference, decreasing = TRUE), ]
-balance_df <- balance_df[-1, ]
-top10_balance <- balance_df[1:10, ]
-
-ggplot(data = balance_df) + 
-  geom_point(aes(x = reorder(Variable, -Standardized_difference, decreasing = TRUE), y = Standardized_difference)) + 
-  coord_flip() + 
-  theme_bw() + 
-  labs(x = "Covariates", 
-       y = "Standardized Difference-in-means") +
-  theme(axis.text = element_text(size = 8),
-        axis.title = element_text(size = 9))
