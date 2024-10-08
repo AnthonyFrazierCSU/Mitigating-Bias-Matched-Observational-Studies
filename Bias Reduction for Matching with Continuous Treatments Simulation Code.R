@@ -1441,9 +1441,6 @@ write.csv(average_histograms[3, ], "average_hist_RFCDE_sim2.csv")
 write.csv(average_histograms[4, ], "average_hist_model_sim2.csv")
 
 
-#### Simulation Tables and Plots:
-
-#### Results
 # Simulation Result Tables ----
 # creates table showing MAE, RMSE, Mean length and coverage results
 
