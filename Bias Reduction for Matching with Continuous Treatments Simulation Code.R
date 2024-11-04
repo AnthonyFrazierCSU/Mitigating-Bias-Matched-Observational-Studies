@@ -30,8 +30,8 @@ library(dplyr)
 library(earth)
 library("foreach")
 library("doParallel")
-devtools::install_github("ZijunGao/LinCDE", build_vignettes = TRUE)
-#devtools::install_github("tpospisi/RFCDE/r")
+remotes::install_github("ZijunGao/LinCDE", build_vignettes = TRUE)
+remotes::install_github("tpospisi/RFCDE", subdir = "r")
 # This section lists useful functions that aren't necessary to perform the 
 # simulation, but improve quality of life
 #### round_df: rounds all numeric values in a dataframe to a specified digit.
@@ -191,6 +191,9 @@ propensity_matrix_linCDE <- function(data){
   for(i in 1:nrow(propensity_matrix)){
     propensity_matrix[i, ] <- predict(model, X = data[i, 3:ncol(data)], y = data[, 1])
   }
+  
+  # propensity_matrix_2 <- matrix(0, nrow = nrow(data), ncol = nrow(data))
+  # propensity_matrix_2 <- sapply(propensity_matrix, predict(model, X = data[, 3:ncol(data)], y = data[, 1]))
   
   # will hold output (matrix of probabilities of observed treatment assignment)
   p_matrix <- matrix(0, nrow = nrow(data), ncol = nrow(data))
@@ -961,7 +964,7 @@ for(i in 1:length(matching_method_vector)){
   for(m in 1:length(estimation_method_vector)){
     
     subdata <- method_data[which(method_data$estimation_method == estimation_method_vector[m]), ]
-    mean_abs_error <- mean(abs(subdata[, 1] - subdata[, 2]))
+    mean_abs_error <- mean(subdata[, 2] - subdata[, 1])
     root_MSE <- sqrt(mean((subdata[, 1] - subdata[, 2])^2))
     MOE_average <- mean(subdata[, 3])
     coverage_rate <- mean(subdata[, 6])
@@ -974,7 +977,7 @@ for(i in 1:length(matching_method_vector)){
 
 summary_data[, -c(1, 2)] <- lapply(summary_data[, -c(1, 2)], as.numeric)
 summary_data[, 5] <- 2*summary_data[, 5]
-names(summary_data) <- c("Matching_Method", "Estimation_Method","Mean_Abs_Error", "RMSE", "Average_Length", "Coverage_Rate")
+names(summary_data) <- c("Matching_Method", "Estimation_Method","Mean_Error", "RMSE", "Average_Length", "Coverage_Rate")
 
 write.csv(summary_data, "sim_summary.csv")
 
@@ -1338,7 +1341,7 @@ for(i in 1:length(matching_method_vector)){
   for(m in 1:length(estimation_method_vector)){
     
     subdata <- method_data[which(method_data$estimation_method == estimation_method_vector[m]), ]
-    mean_abs_error <- mean(abs(subdata[, 1] - subdata[, 2]))
+    mean_abs_error <- mean(subdata[, 2] - subdata[, 1])
     root_MSE <- sqrt(mean((subdata[, 1] - subdata[, 2])^2))
     MOE_average <- mean(subdata[, 3])
     coverage_rate <- mean(subdata[, 6])
@@ -1351,7 +1354,7 @@ for(i in 1:length(matching_method_vector)){
 
 summary_data[, -c(1, 2)] <- lapply(summary_data[, -c(1, 2)], as.numeric)
 summary_data[, 5] <- 2*summary_data[, 5]
-names(summary_data) <- c("Matching_Method", "Estimation_Method","Mean_Abs_Error", "RMSE", "Average_Length", "Coverage_Rate")
+names(summary_data) <- c("Matching_Method", "Estimation_Method","Mean_Error", "RMSE", "Average_Length", "Coverage_Rate")
 summary_data
 
 write.csv(summary_data, "sim_summary2.csv")
@@ -1441,6 +1444,9 @@ write.csv(average_histograms[3, ], "average_hist_RFCDE_sim2.csv")
 write.csv(average_histograms[4, ], "average_hist_model_sim2.csv")
 
 
+#### Simulation Tables and Plots:
+
+#### Results
 # Simulation Result Tables ----
 # creates table showing MAE, RMSE, Mean length and coverage results
 
@@ -1472,14 +1478,19 @@ kbl(mean_balance, align = 'c', booktabs = T, format = "latex", row.names = FALSE
 # P Distribution Plots ----
 # average distribution of treatment assignment probabilities
 
-#plot <- as.numeric(read.csv("average_hist_oracle.csv")[, -1])
+#plot <- as.numeric(read.csv("average_hist_oracle_sim2.csv")[, -1])
+#plot <- as.numeric(read.csv("average_hist_linCDE_sim2.csv")[, -1])
+#plot <- as.numeric(read.csv("average_hist_RFCDE_sim2.csv")[, -1])
+plot <- as.numeric(read.csv("average_hist_model_sim2.csv")[, -1])
+
 ggplot()+
   geom_histogram(aes(x = plot), binwidth = 0.05, color = "black", fill = "white") + 
   theme_bw() +
   #labs(x = "Probability of Observed Treatment Assignment", y = "Frequency") +
   labs(x = "", y = "") +
-  theme(axis.text = element_text(size = 12))
-ggsave("P_distribution_oracle.png", width = 4.5, height = 3)
+  theme(axis.text = element_text(size = 12)) + 
+  scale_x_continuous(limits = c(0, 1))
+ggsave("P_distribution_model_sim2.png", width = 4.5, height = 3)
 
 
 ################################################################################
