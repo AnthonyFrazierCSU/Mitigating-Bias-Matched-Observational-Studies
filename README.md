@@ -11,7 +11,7 @@ The code is for reproducing the main and supplementary simulations for the paper
 
 ### Results in Section 1 (Introduction: Background, Motivating Example, and Main Contributions)
 
-Download the `Social Distancing Data Analysis Code.R` file, load the necessary libraries and functions, then run the `Balance table for original set of 1,211 matched pairs` code chunk to produce figure 1. 
+Download the `Bias Mitigation in Matched Observational Studies Application Code.R` file, run the `Libraries, Data Files, Functions` code chunk to load the necessary libraries and functions, then run the `Balance Table for Original Set of 1,211 Matched Pairs` code chunk to produce figure 1. 
 
 ### Results in Section 5 (Simulation Studies)
   
@@ -19,13 +19,13 @@ Download the `Bias Reduction for Matching with Continuous Treatments Simulation 
 
 ### Results in Section 6 (Data Application: Re-Analyzing the Effects of Social Distancing Practice On COVID-19 Case Counts)
 
-1) **Figure 2:** In the `Social Distancing Data Analysis Code.R` file, run the `creating p-matrix (linCDE)` and the `Plots and summary statistics of probability of observed treatment assignment` code chunks to produce the two plots shown in figure 2.
+1) **Figure 2:** In the `Social Distancing Data Analysis Code.R` file, run the `Creating p-matrix (linCDE)` and the `Plots and Summary Statistics of Probability of Observed Treatment Assignment` code chunks to produce the two plots shown in figure 2.
 
-2) **Table 3:** In the `Social Distancing Data Analysis Code.R` file, run the `creating p-matrix (linCDE)` and the `Average treatment effect estimation for original set of matched pairs, Cases` code chunks to replicate the ATE results pertaining to the non-calipered set of matched pairs. Run the `0.1 caliper analysis` code chunk to replicate the ATE results pertaining to the calipered set of matched pairs. 
+2) **Table 3:** In the `Social Distancing Data Analysis Code.R` file, run the `Creating p-matrix (linCDE)` and the `Average Treatment Effect Estimation for Original Set of Matched Pairs` code chunks to replicate the ATE results pertaining to the non-calipered set of matched pairs. Run the `Average Treatment Effect Estimation for Calipered (xi=0.1) Set of Matched Pairs` code chunk to replicate the ATE results pertaining to the calipered set of matched pairs. These code chunks also provide the results shown in Appendix C, table S3. 
 
 ### Results in Web Appendix B (Extra Simulations)
 
-1) **Section B.1 and B.2:** In the `Bias Reduction for Matching with Continuous Treatments Simulation code.R` file, after running the `Simulation 1 Estimation and Inference (MAE, RMSE, ML, CR)` code chunk, run the `Simulation 1 P Distribution (supplementary materials)` code chunk to produce the .csv files containing the distribution of treatment assignment probabilities for simulation 1. To replicate the figures in section B.1, run the `P Distribution Plots` code chunk, which will create a histogram for whichever .csv file you chose to read into the plot object. Repeat these steps for the `Simulation 2 Estimation and Inference (MAE, RMSE, ML, CR)` and `Simulation 2 P Distribution (supplementary materials)` code chunks to replicate the results shown in section B.2.
+1) **Section B.1 and B.2:** In the `Bias Reduction for Matching with Continuous Treatments Simulation code.R` file, after running the `Simulation 1 Estimation and Inference (MAE, RMSE, ML, CR)` code chunk, run the `Simulation 1 P Distribution (supplementary materials)` code chunk to produce the .csv files containing the distribution of treatment assignment probabilities for simulation 1. To replicate the figures in section B.1, run the `P Distribution Plots` code chunk, which will create a histogram for whichever .csv file you chose to read into the plot object. Repeat these steps for the `Simulation 2 Estimation and Inference (MAE, RMSE, ML, CR)` and `Simulation 2 P Distribution (supplementary materials)` code chunks to replicate the results shown in figure S2
 
 2) **Section B.3:** In the `Bias Reduction for Matching with Continuous Treatments Simulation code.R` file, after running the `Simulation 1 Estimation and Inference (MAE, RMSE, ML, CR)` and the `Simulation 2 Estimation and Inference (MAE, RMSE, ML, CR)` code chunks, run the `Covariate Balance Tables` code chunk to create the covariate balance tables for simulations 1 and 2 separately.
 
