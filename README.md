@@ -19,27 +19,21 @@ Download the `Bias Reduction for Matching with Continuous Treatments Simulation 
 
 ### Results in Section 6 (Data Application: Re-Analyzing the Effects of Social Distancing Practice On COVID-19 Case Counts)
 
-1) **Figure 2:** In the `Social Distancing Data Analysis Code.R` file, run the `Creating p-matrix (linCDE)` and the `Plots and Summary Statistics of Probability of Observed Treatment Assignment` code chunks to produce the two plots shown in figure 2.
+1) **Figure 2:** In the `Bias Mitigation in Matched Observational Studies Application Code.R` file, run the `Creating p-matrix (linCDE)` and the `Plots and Summary Statistics of Probability of Observed Treatment Assignment` code chunks to produce the two plots shown in figure 2.
 
-2) **Table 3:** In the `Social Distancing Data Analysis Code.R` file, run the `Creating p-matrix (linCDE)` and the `Average Treatment Effect Estimation for Original Set of Matched Pairs` code chunks to replicate the ATE results pertaining to the non-calipered set of matched pairs. Run the `Average Treatment Effect Estimation for Calipered (xi=0.1) Set of Matched Pairs` code chunk to replicate the ATE results pertaining to the calipered set of matched pairs. These code chunks also provide the results shown in Appendix C, table S3. 
+2) **Table 3:** In the `Bias Mitigation in Matched Observational Studies Application Code.R` file, run the `Creating p-matrix (linCDE)` and the `Average Treatment Effect Estimation for Original Set of Matched Pairs` code chunks to replicate the ATE results pertaining to the non-calipered set of matched pairs. Run the `Average Treatment Effect Estimation for Calipered (xi=0.1) Set of Matched Pairs` code chunk to replicate the ATE results pertaining to the calipered set of matched pairs. These code chunks also provide the results shown in Appendix C, **table S3**. 
 
 ### Results in Web Appendix B (Extra Simulations)
 
-1) **Section B.1 and B.2:** In the `Bias Reduction for Matching with Continuous Treatments Simulation code.R` file, after running the `Simulation 1 Estimation and Inference (MAE, RMSE, ML, CR)` code chunk, run the `Simulation 1 P Distribution (supplementary materials)` code chunk to produce the .csv files containing the distribution of treatment assignment probabilities for simulation 1. To replicate the figures in section B.1, run the `P Distribution Plots` code chunk, which will create a histogram for whichever .csv file you chose to read into the plot object. Repeat these steps for the `Simulation 2 Estimation and Inference (MAE, RMSE, ML, CR)` and `Simulation 2 P Distribution (supplementary materials)` code chunks to replicate the results shown in figure S2
+1) **Figures S1 and S2** In the `Bias Reduction for Matching with Continuous Treatments Simulation code.R` file, after running the `Simulation 1 Estimation and Inference (MAE, RMSE, ML, CR)` code chunk, run the `Simulation 1 P Distribution (supplementary materials)` code chunk to produce the .csv files containing the distribution of treatment assignment probabilities for simulation 1. To replicate figure S1, run the `P Distribution Plots` code chunk, which will create a histogram for whichever .csv file you chose to read into the plot object. Repeat these steps for the `Simulation 2 Estimation and Inference (MAE, RMSE, ML, CR)` and `Simulation 2 P Distribution (supplementary materials)` code chunks to replicate the results shown in figure S2.
 
-2) **Section B.3:** In the `Bias Reduction for Matching with Continuous Treatments Simulation code.R` file, after running the `Simulation 1 Estimation and Inference (MAE, RMSE, ML, CR)` and the `Simulation 2 Estimation and Inference (MAE, RMSE, ML, CR)` code chunks, run the `Covariate Balance Tables` code chunk to create the covariate balance tables for simulations 1 and 2 separately.
+2) **Table S1** In the `Bias Reduction for Matching with Continuous Treatments Simulation code.R` file, after running the `Simulation 1 Estimation and Inference (MAE, RMSE, ML, CR)` and the `Simulation 2 Estimation and Inference (MAE, RMSE, ML, CR)` code chunks, run the `Covariate Balance Tables` code chunk to create the covariate balance tables for simulations 1 and 2 separately.
 
 ### Results in Web Appendix C (Real Data Application)
 
-1) **Section C.2:** In the `Social Distancing Data Analysis Code.R` file, run the ggplot code in the `0.1 caliper analysis` code chunk to replicate figure 3. 
+1) **Table S2** The balance table shown in table S2 is based from the "balance_table.csv" file.
 
-2) **Section C.3:** The `balance_table.csv` file contains the balance table information shown in section C.3.
-
-3) **Section C.4:** In the `Social Distancing Data Analysis Code.R` file, run the `creating p-matrix (linCDE)` and the `Urban vs Rural Subgroup Analysis` code chunks to replicate table 1 and both plots shown in figure 4.
-
-4) **Section C.5:** In the `Social Distancing Data Analysis Code.R` file, run the `creating p-matrix (linCDE)` and the `Subgroup analysis (by quantile of dose differences)` code chunks to replicate table 3
-
-5) **Section C.6:** All sensitivity analysis results can be replicated in the `Sensitivity Analysis` section of the `Social Distancing Data Analysis Code.R` file.
+2) **Figure S3** In the `Bias Mitigation in Matched Observational Studies Application Code.R` file, run the ggplot code in the `Average Treatment Effect Estimation for Calipered (xi=0.1) Set of Matched Pairs` code chunk to replicate figure S3. 
 
 ## License
 Copyright 2024 Anthony Frazier, Siyu Heng, and Wen Zhou
