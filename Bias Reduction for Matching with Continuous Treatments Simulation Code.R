@@ -17,13 +17,6 @@
 library(tidyverse)                                                  # for dataframe manipulation
 library(randomForest)
 library(nbpMatching)                                                # non-bipartite matching algorithm
-#library(nimble)                                                     # for double-exponential distribution
-#library(KernSmooth)
-#library(lattice)
-#library(latticeExtra)                                               # for ECDF plotting
-#library(xgboost)                                                    # for XGBoost
-#library(Matrix)                                                     # For XGBoost
-library(RFCDE)
 library(kableExtra)
 library(tidyr)
 library(dplyr)
@@ -31,13 +24,11 @@ library(earth)
 library("foreach")
 library("doParallel")
 remotes::install_github("ZijunGao/LinCDE", build_vignettes = TRUE)
-remotes::install_github("tpospisi/RFCDE", subdir = "r")
+remotes::install_github("lee-group-CMU/RFCDE/r")
 # This section lists useful functions that aren't necessary to perform the 
 # simulation, but improve quality of life
 #### round_df: rounds all numeric values in a dataframe to a specified digit.
-
 #### CI_maker: creates wald-type CI given a point estimate and variance.
-
 #### coverage_check: checks if paramter of interest lies within CI. 
 
 round_df <- function(x, digits) {
@@ -734,15 +725,12 @@ write.csv(covariate_balance, "covariate_balance_sim1.csv")
 # Parallelization setup
 numcores <- detectCores()
 output <- data.frame(matrix(nrow = 0, ncol = 8))
-
-for(k in 1:(iter/10)){
- 
-  registerDoParallel(numcores - 6)
+registerDoParallel(numcores - 6)
   
   # now, we create matched pairs and estimate treatment effects with each matching
   # and estimation method we're interested in.
   
-  small_output <- foreach(i = ((10*(k-1) + 1):(10*k)), .combine = rbind,
+  small_output <- foreach(i = 1:iter, .combine = rbind,
                     .packages = c("nbpMatching",
                                   "RFCDE",
                                   "randomForest",
@@ -937,8 +925,6 @@ for(k in 1:(iter/10)){
   stopImplicitCluster()
   small_output[, -c(7, 8)] <- lapply(small_output[, -c(7, 8)], as.numeric)
   output <- rbind(output, small_output)
-  print(k)
-}
 
 # Now, we'll compile the results of our simulation
 
