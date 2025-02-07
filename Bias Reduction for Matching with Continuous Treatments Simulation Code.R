@@ -23,7 +23,8 @@ library(dplyr)
 library(earth)
 library("foreach")
 library("doParallel")
-remotes::install_github("ZijunGao/LinCDE", build_vignettes = TRUE)
+library(pak)
+pak::pkg_install("ZijunGao/LinCDE")
 remotes::install_github("lee-group-CMU/RFCDE/r")
 # This section lists useful functions that aren't necessary to perform the 
 # simulation, but improve quality of life
