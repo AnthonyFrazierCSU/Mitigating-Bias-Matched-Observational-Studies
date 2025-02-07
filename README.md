@@ -9,19 +9,19 @@ The code is for reproducing the main and supplementary simulations for the paper
 
 ## Guidelines for Replication
 
-### Results in Section 1 (Introduction: Background, Motivating Example, and Main Contributions)
+### Results in Section 1 (Introduction)
 
 Download the `Bias Mitigation in Matched Observational Studies Application Code.R` file, run the `Libraries, Data Files, Functions` code chunk to load the necessary libraries and functions, then run the `Balance Table for Original Set of 1,211 Matched Pairs` code chunk to produce figure 1. 
 
-### Results in Section 5 (Simulation Studies)
+### Results in Section 4 (Simulation Studies)
   
-Download the `Bias Reduction for Matching with Continuous Treatments Simulation code.R` file, load the necessary libraries and functions, then run the simulations in the Main Simulation section. Specifically, run the `Simulation 1 Estimation and Inference (MAE, RMSE, ML, CR)` and the `Simulation 2 Estimation and Inference (MAE, RMSE, ML, CR)`chunks of code to replicate results shown in tables 1 and 2 of the main manuscript. You may run the `Simulation Result Tables` chunk of code to produce a LaTeX table showing the MAE, RMSE, ML and CR results combined. 
+Download the `Bias Reduction for Matching with Continuous Treatments Simulation code.R` file, load the necessary libraries and functions, then run the simulations in the Main Simulation section. Specifically, run the `Simulation 1 Estimation and Inference (MAE, RMSE, ML, CR)` and the `Simulation 2 Estimation and Inference (MAE, RMSE, ML, CR)`chunks of code to replicate results shown in tables 1 and 2 of the main manuscript. You may run the `Simulation Result Tables` chunk of code to produce a LaTeX table showing the Bias, MCIL and CR results combined. 
 
-### Results in Section 6 (Data Application: Re-Analyzing the Effects of Social Distancing Practice On COVID-19 Case Counts)
+### Results in Section 5 (Data Application: Re-Analyzing the Effects of Social Distancing Practice On COVID-19 Case Counts)
 
 1) **Figure 2:** In the `Bias Mitigation in Matched Observational Studies Application Code.R` file, run the `Creating p-matrix (linCDE)` and the `Plots and Summary Statistics of Probability of Observed Treatment Assignment` code chunks to produce the two plots shown in figure 2.
 
-2) **Table 3:** In the `Bias Mitigation in Matched Observational Studies Application Code.R` file, run the `Creating p-matrix (linCDE)` and the `Average Treatment Effect Estimation for Original Set of Matched Pairs` code chunks to replicate the ATE results pertaining to the non-calipered set of matched pairs. Run the `Average Treatment Effect Estimation for Calipered (xi=0.1) Set of Matched Pairs` code chunk to replicate the ATE results pertaining to the calipered set of matched pairs. These code chunks also provide the results shown in Appendix C, **table S3**. 
+2) **Table 3:** In the `Bias Mitigation in Matched Observational Studies Application Code.R` file, run the `Creating p-matrix (linCDE)` and the `Average Treatment Effect Estimation for Original Set of Matched Pairs` code chunks to replicate the ATE results pertaining to the non-calipered set of matched pairs. Run the `Average Treatment Effect Estimation for Calipered (xi=0.1) Set of Matched Pairs` code chunk to replicate the ATE results pertaining to the calipered set of matched pairs. 
 
 ### Results in Web Appendix B (Extra Simulations)
 
@@ -33,10 +33,12 @@ Download the `Bias Reduction for Matching with Continuous Treatments Simulation 
 
 1) **Table S2** The balance table shown in table S2 is based from the "balance_table.csv" file.
 
-2) **Figure S3** In the `Bias Mitigation in Matched Observational Studies Application Code.R` file, run the ggplot code in the `Average Treatment Effect Estimation for Calipered (xi=0.1) Set of Matched Pairs` code chunk to replicate figure S3. 
+2) **Figure S3** In the `Bias Mitigation in Matched Observational Studies Application Code.R` file, run the ggplot code in the `Average Treatment Effect Estimation for Calipered (xi=0.1) Set of Matched Pairs` code chunk to replicate figure S3.
+
+3) **Table S3** The content for this table can be found by running the `Average Treatment Effect Estimation for Original Set of Matched Pairs` and `Average Treatment Effect Estimation for Calipered (xi=0.1) Set of Matched Pairs` code chunks. 
 
 ## License
-Copyright 2024 Anthony Frazier, Siyu Heng, and Wen Zhou
+Copyright 2025 Anthony Frazier, Siyu Heng, and Wen Zhou
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
