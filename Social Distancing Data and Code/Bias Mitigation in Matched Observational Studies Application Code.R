@@ -5,7 +5,7 @@
 ####                Anthony Frazier, Siyu Heng, Wen Zhou                    ####
 ################################################################################
 
-#### libraries, data files, functions --------------------------------------------------
+#### Libraries, Data Files, Functions --------------------------------------------------
 library(ggplot2)                                    # plot creation
 library(tidyverse)                                  # dataframe manipulation
 library(randomForest)                               # used in linCDE, if using RF for centering
@@ -19,17 +19,17 @@ set.seed(12345)                                     # linCDE reproducibility
 # data files
 lowdose_data <- read.csv("matched_data_lowdose.csv")
 highdose_data <- read.csv("matched_data_highdose.csv")
-lowdose_0.1caliper_data <- read.csv("matched_data_0.1caliper_lowdose.csv")
-highdose_0.1caliper_data <- read.csv("matched_data_0.1caliper_highdose.csv")
-caliper_p_dist <- read.csv("full_p_distribution_0.1caliper.csv")[, -1]
+lowdose_0.075caliper_data <- read.csv("matched_data_0.075caliper_lowdose.csv")
+highdose_0.075caliper_data <- read.csv("matched_data_0.075caliper_highdose.csv")
+caliper_p_dist <- read.csv("full_p_distribution_0.075caliper.csv")[, -1]
 
 # reformatting / cleaning data
 names(lowdose_data)[1] <- "ID"
 names(highdose_data)[1] <- "ID"
 all_postmatch_data <- rbind(lowdose_data, highdose_data)
-names(lowdose_0.1caliper_data)[1] <- "ID"
-names(highdose_0.1caliper_data)[1] <- "ID"
-all_postmatch_0.1caliper_data <- rbind(lowdose_0.1caliper_data, highdose_0.1caliper_data)
+names(lowdose_0.075caliper_data)[1] <- "ID"
+names(highdose_0.075caliper_data)[1] <- "ID"
+all_postmatch_0.075caliper_data <- rbind(lowdose_0.075caliper_data, highdose_0.075caliper_data)
 
 # functions
 round_df <- function(x, digits) {
@@ -70,9 +70,8 @@ quantile_analysis <- function(high_df, low_df, quants, pvec, xi){
     
     # classic Neyman estimator with covariate-adjusted variance estimator
     
-    covariates <- c(6:8, 10:15, 20:46, 54:55)
+    covariates <- c(6:8, 10:15, 20:46, 54)
     Q <- as.matrix((high_df_sub[, covariates] - low_df_sub[, covariates])/2)
-    Q <- Q[, -ncol(Q)]
     hatQ <- Q %*% solve(base::t(Q)%*%Q) %*% base::t(Q)
     y <- 2*(high_df_sub[, "cases"] - low_df_sub[, "cases"])/sqrt(1-diag(hatQ))
     cov_adj_var <- (y %*% (diag(1, nrow(hatQ)) - hatQ) %*% y)/(4 * (sum(high_df_sub[, "cumulative_dose"] - low_df_sub[, "cumulative_dose"])^2))
@@ -104,9 +103,7 @@ quantile_analysis <- function(high_df, low_df, quants, pvec, xi){
     output <- rbind(output, c(quant, "bias_Corrected", ATE_bias_corrected_cases, CI_ATE_bias_corrected_cases))
     
     # bias-corrected estimator (non-regulated) with covariate-adjusted variance estimator
-    covariates <- c(6:8, 10:15, 20:46, 54:55)
     Q <- as.matrix((high_df_sub[, covariates] - low_df_sub[, covariates])/2)
-    Q <- Q[, -ncol(Q)]
     hatQ <- Q %*% solve(base::t(Q)%*%Q) %*% base::t(Q)
     bc_y <- (p_sub^(-1))*(high_df_sub[, "cases"] - low_df_sub[, "cases"])/sqrt(1-diag(hatQ))
     cov_adj_var <- (bc_y %*% (diag(1, nrow(hatQ)) - hatQ) %*% bc_y)/(4 * (sum(high_df_sub[, "cumulative_dose"] - low_df_sub[, "cumulative_dose"])^2))
@@ -181,7 +178,7 @@ quantile_analysis <- function(high_df, low_df, quants, pvec, xi){
   
 }
 
-#### creating p-matrix (linCDE) ------------------------------------------------
+#### Creating p-matrix (linCDE) ------------------------------------------------
 
 covariates <- c(6:8, 10:15, 20:46, 54:55)
 
@@ -213,7 +210,7 @@ for(i in 1:nrow(highdose_data)){
   p_matched[i] <- p_matrix[i, i+1211]
 }
 
-#### Plots and summary statistics of probability of observed treatment assignment ----
+#### Plots and Summary Statistics of Probability of Observed Treatment Assignment ----
 
 # histogram showing distribution of probability of observed treatment assignment for all possible pairs
 ggplot() + 
@@ -222,6 +219,12 @@ ggplot() +
   labs(x = "Probability of Observed Treatment Assignment", y = "Frequency") + 
   theme(axis.text = element_text(size = 12))
 ggsave("P_distribution_all.png", width = 4.5, height = 3)
+
+# calculating the proportion of possible matched pairings that would be prevented
+# from being included in our final set of matched pairs when we implement our 
+# dose assignment discrepancy caliper with xi = 0.1. 
+num_outside_caliper <- length(which(p_matrix[upper.tri(p_matrix)] > 0.925 | p_matrix[upper.tri(p_matrix)] < 0.075))
+prop_outside_caliper <- num_outside_caliper / (dim(p_matrix)[1]*(dim(p_matrix)[1] - 1)/2)
 
 # histogram showing distribution of probability of observed treatment assignment of matched pairs
 ggplot() + 
@@ -234,13 +237,43 @@ ggsave("P_distribution_matched.png", width = 4.5, height = 3)
 # 5-number summary of probability of observed treatment assignment for matched pairs
 quantile(p_matched, c(0, 0.25, 0.5, 0.75, 1.0))
 
-#### Average treatment effect estimation for original set of matched pairs, Cases -----
+# how many pairs in the non-calipered set of matched pairings are retained in the
+# calipered set of matched pairs?
 
-main_analysis_data <- quantile_analysis(highdose_data, lowdose_data, c(0), p_matched, 0.1)
+non_calipered_pairs <- cbind(lowdose_data$ID, highdose_data$ID)
+calipered_pairs <- cbind(lowdose_0.075caliper_data$ID, highdose_0.075caliper_data$ID)
+
+sorted_non_calipered_pairs <- data.frame(matrix(nrow = 0, ncol = 2))
+for(i in 1:nrow(non_calipered_pairs)){
+  sorted_non_calipered_pairs[i, ] <- c(min(non_calipered_pairs[i, ]), max(non_calipered_pairs[i, ]))
+}
+
+sorted_non_calipered_pairs <- sorted_non_calipered_pairs[order(sorted_non_calipered_pairs[, 1]), ]
+
+sorted_calipered_pairs <- data.frame(matrix(nrow = 0, ncol = 2))
+for(i in 1:nrow(calipered_pairs)){
+  sorted_calipered_pairs[i, ] <- c(min(calipered_pairs[i, ]), max(calipered_pairs[i, ]))
+}
+
+sorted_calipered_pairs <- sorted_calipered_pairs[order(sorted_calipered_pairs[, 1]), ]
+
+num_same <- 0
+for(i in 1:nrow(sorted_calipered_pairs)){
+  num_same <- num_same + ifelse(sum(sorted_calipered_pairs[i, ] == sorted_non_calipered_pairs[i, ]) == 2, 1, 0)
+}
+
+num_same <- 0
+for(i in 1:nrow(sorted_calipered_pairs)){
+  num_same <- num_same + ifelse(sorted_calipered_pairs[i, 1] == sorted_non_calipered_pairs[i, 1], 1, 0)
+}
+
+#### Average Treatment Effect Estimation for Original Set of Matched Pairs -----
+
+main_analysis_data <- quantile_analysis(highdose_data, lowdose_data, c(0), p_matched, 0.075)
 main_analysis_data <- main_analysis_data[, -1]
 write.csv(main_analysis_data, "main_analysis_summary.csv")
 
-#### 0.1 caliper analysis ----
+#### Average Treatment Effect Estimation for Calipered (xi = 0.075) Set of Matched Pairs ----
 
 # histogram showing distribution of probability of observed treatment assignment of matched pairs
 ggplot() + 
@@ -248,20 +281,116 @@ ggplot() +
   theme_bw() + 
   labs(x = "Probability of Observed Treatment Assignment", y = "Frequency") + 
   theme(axis.text = element_text(size = 12))
-ggsave("P_distribution_0.1caliper.png", width = 4.5, height = 3)
+ggsave("P_distribution_0.075caliper.png", width = 4.5, height = 3)
 
 # 5-number summary of probability of observed treatment assignment for matched pairs
 quantile(caliper_p_dist, c(0, 0.25, 0.5, 0.75, 1.0))
 
-caliper_analysis <- quantile_analysis(highdose_0.1caliper_data, lowdose_0.1caliper_data, c(0), caliper_p_dist, 0.1)
+caliper_analysis <- quantile_analysis(highdose_0.075caliper_data, lowdose_0.075caliper_data, c(0), caliper_p_dist, 0.75)
 caliper_analysis <- caliper_analysis[, -1]
 #caliper_analysis <- caliper_analysis[-3, ]
 write.csv(caliper_analysis, "main_caliper_analysis.csv")
 
 
-#### Balance table for original set of 1,211 matched pairs ---------------------
+#### Balance Table for Original Set of 1,211 Matched Pairs ---------------------
 
+# formatting balance table for original set of matched pairs
 bt <- read.csv("balance_table.csv")
+bt <- bt[-((nrow(bt)-1):(nrow(bt))), c(1, 4)]
+names(bt) <- c("Variable", "standardized_difference")
+bt$Variable <- c("Female", "Below 18", "Above 65", "Black", "Hispanic", "Black/Hispanic",
+                 "Driving Alone to Work", "Smoking", "Flu Vaccine", "Some College",
+                 "Social Association", "Traffic", "Non Metro", "Percent Poverty", 
+                 "Population Density", "Population", "Cases 1 Week Before", 
+                 "Cases 2 Weeks Before", "Cases 3 Weeks Before",
+                 "Cases 4 Weeks Before", "Cases 5 Weeks Before",
+                 "Cases 6 Weeks Before", "Cases 7 Weeks Before",
+                 "Cases 8 Weeks Before", "Cases 9 Weeks Before",
+                 "Cases 10 Weeks Before", "Cases 11 Weeks Before",
+                 "Deaths 1 Week Before", "Deaths 2 Weeks Before", "Deaths 3 Weeks Before",
+                 "Deaths 4 Week Before", "Deaths 5 Weeks Before", "Deaths 6 Weeks Before",
+                 "Deaths 7 Week Before", "Deaths 8 Weeks Before", "Deaths 9 Weeks Before",
+                 "Deaths 10 Week Before", "Deaths 11 Weeks Before")
+balance_df <- cbind(bt$Variable, abs(bt$standardized_difference))
+balance_df <- data.frame(balance_df)
+names(balance_df) <- c("Variable", "Standardized_difference")
+balance_df[, 2] <- as.numeric(balance_df[, 2])
+balance_df$Variable <- factor(balance_df$Variable, labels = rev(bt$Variable))
+balance_original_df <- balance_df
+
+# forming balance table of covariate before matching
+covariates <- c(6:8, 10:18, 20:21, 25:46, 54:55, 50)
+
+average_all <- colMeans(all_postmatch_data[, covariates])
+median_Z <- median(all_postmatch_data[, "cumulative_dose"])
+below_median <- all_postmatch_data[which(all_postmatch_data$cumulative_dose < median_Z), ]
+above_median <- all_postmatch_data[which(all_postmatch_data$cumulative_dose >= median_Z), ]
+
+sigma_all <- 1:length(covariates)
+Higher_dose_group <- 1:length(covariates)
+Lower_dose_group <- 1:length(covariates)
+standardized_differences_all <- 1:length(covariates)
+for(k in 1:length(covariates)){
+  sigma_all[k] <- sqrt(sum((all_postmatch_data[, covariates[k]] - average_all[k])^2)/(nrow(all_postmatch_data) - 1))
+  Higher_dose_group[k] <- mean(above_median[, covariates[k]])
+  Lower_dose_group[k] <- mean(below_median[, covariates[k]])
+  standardized_differences_all[k] <- (Higher_dose_group[k] - Lower_dose_group[k])/sigma_all[k]
+}
+
+v <- c("Female", "Below 18", "Above 65", "Population", 
+       "Driving Alone to Work", "Smoking", "Flu Vaccine", "Some College",
+       "Social Association", "Traffic", "Black", "Hispanic",
+       "Percent Poverty", "Population Density", "Cases 1 Week Before",
+       "Cases 2 Weeks Before", "Cases 3 Weeks Before",
+       "Cases 4 Weeks Before", "Cases 5 Weeks Before",
+       "Cases 6 Weeks Before", "Cases 7 Weeks Before",
+       "Cases 8 Weeks Before", "Cases 9 Weeks Before",
+       "Cases 10 Weeks Before", "Cases 11 Weeks Before",
+       "Deaths 1 Week Before", "Deaths 2 Weeks Before", "Deaths 3 Weeks Before",
+       "Deaths 4 Week Before", "Deaths 5 Weeks Before", "Deaths 6 Weeks Before",
+       "Deaths 7 Week Before", "Deaths 8 Weeks Before", "Deaths 9 Weeks Before",
+       "Deaths 10 Week Before", "Deaths 11 Weeks Before", "Black/Hispanic", "Non Metro", "Cumulative Dose")
+balance_all <- data.frame(do.call("cbind", list(v, standardized_differences_all,
+                                                Higher_dose_group, Lower_dose_group)))
+names(balance_all) <- c("Variable", "Standardized_difference", "Higher_dose_group", "Lower_dose_group")
+balance_all[, 2:4] <- lapply(balance_all[, 2:4], as.numeric)
+
+write.csv(balance_all, "balance_before_match.csv")
+
+
+ggplot(data = balance_df) + 
+  geom_point(aes(x = Variable, y = Standardized_difference)) + 
+  scale_y_continuous(limits = c(0, 1), breaks = seq(0, 1, by = 0.2)) +
+  geom_hline(yintercept = 0.2, linetype = "dashed") + 
+  coord_flip() + 
+  theme_bw() + 
+  labs(x = "Covariates", 
+       y = "Standardized Difference-in-means") +
+  theme(axis.text = element_text(size = 8),
+        axis.title = element_text(size = 9))
+ggsave("Covariate Balance for Original Matched Pairs.png", height = 4.5, width = 5.5)
+
+
+# balance table before matching versus original matched pairs
+
+balance_all_covariates <- balance_all[-nrow(balance_all), ]
+
+ggplot() + 
+  geom_point(data = balance_df, aes(x = Variable, y = Standardized_difference), shape = 20, size = 3) + 
+  geom_point(data = balance_all_covariates, aes(x = Variable, y = abs(Standardized_difference)), shape = 1, size = 2) +
+  scale_y_continuous(limits = c(0, 1), breaks = seq(0, 1, by = 0.2)) +
+  geom_hline(yintercept = 0.2, linetype = "dashed") + 
+  coord_flip() + 
+  theme_bw() + 
+  labs(x = "Covariates", 
+       y = "Standardized Difference-in-means") +
+  theme(axis.text = element_text(size = 8),
+        axis.title = element_text(size = 9))
+ggsave("Covariate Balance, Original versus Unmatched.png", height = 4.5, width = 5.5)
+
+#### Balance Table, Calipered (xi = 0.075) Versus Original Set ---------------------
+
+bt <- read.csv("balance_table_0.075caliper.csv")
 bt <- bt[-((nrow(bt)-1):(nrow(bt))), c(1, 4)]
 names(bt) <- c("Variable", "standardized_difference")
 bt$Variable <- c("Female", "Below 18", "Above 65", "Black", "Hispanic", "Black/Hispanic",
@@ -284,8 +413,13 @@ balance_df[, 2] <- as.numeric(balance_df[, 2])
 balance_df$Variable <- factor(balance_df$Variable, labels = rev(bt$Variable))
 #top10_balance <- balance_df[1:10, ]
 
-ggplot(data = balance_df) + 
-  geom_point(aes(x = Variable, y = Standardized_difference)) + 
+balance_original_df$Caliper <- "No"
+balance_df$Caliper <- "Yes"
+balance_all <- rbind(balance_original_df, balance_df)
+
+ggplot() + 
+  geom_point(data = balance_original_df, aes(x = Variable, y = Standardized_difference), shape = 20, size = 2) + 
+  geom_point(data = balance_df, aes(x = Variable, y = Standardized_difference), shape = 2, size = 2) + 
   scale_y_continuous(limits = c(0, 1), breaks = seq(0, 1, by = 0.2)) +
   geom_hline(yintercept = 0.2, linetype = "dashed") + 
   coord_flip() + 
@@ -294,6 +428,6 @@ ggplot(data = balance_df) +
        y = "Standardized Difference-in-means") +
   theme(axis.text = element_text(size = 8),
         axis.title = element_text(size = 9))
-ggsave("Covariate Balance for Original Matched Pairs.png", height = 4.5, width = 5.5)
+ggsave("Covariate Balance Original vs Calipered.png", height = 4.5, width = 5.5)
 
 
