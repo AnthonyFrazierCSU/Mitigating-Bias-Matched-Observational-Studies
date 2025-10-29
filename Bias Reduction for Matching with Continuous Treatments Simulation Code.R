@@ -765,12 +765,6 @@ registerDoParallel(numcores - 6)
       MOE_naive <- qnorm(0.975) * sqrt(var_naive)
       temp_data <- rbind(temp_data, c(lambda, e_naive, MOE_naive, CI_naive, coverage_naive, "Naive", "Mahalanobis"))
       
-      # estimators with mahalanobis only pairs, mike estimator
-      confint_mike <- CI_mike(test, mahalanobis_pairs)
-      coverage_mike <- coverage_check(confint_mike, lambda)
-      MOE_mike <- (confint_mike[2] - confint_mike[1])/2
-      temp_data <- rbind(temp_data, c(lambda, e_naive, MOE_mike, confint_mike, coverage_mike, "Mike", "Mahalanobis"))
-      
       # estimators with mahalanobis only pairs, RFCDE estimator
       e_RFCDE <- bias_corrected_estimator(test, mahalanobis_pairs, p_mat_RFCDE, 0.1)
       var_RFCDE <- variance_bias_corrected(test, mahalanobis_pairs, p_mat_RFCDE, e_RFCDE, 0.1)
@@ -805,13 +799,7 @@ registerDoParallel(numcores - 6)
       coverage_naive <- coverage_check(CI_naive, lambda)
       MOE_naive <- qnorm(0.975) * sqrt(var_naive)
       temp_data <- rbind(temp_data, c(lambda, e_naive, MOE_naive, CI_naive, coverage_naive, "Naive", "RFCDE_Caliper"))
-      
-      # estimators with RFCDE pairs, mike estimator
-      confint_mike <- CI_mike(test, RFCDE_pairs)
-      coverage_mike <- coverage_check(confint_mike, lambda)
-      MOE_mike <- (confint_mike[2] - confint_mike[1])/2
-      temp_data <- rbind(temp_data, c(lambda, e_naive, MOE_mike, confint_mike, coverage_mike, "Mike", "RFCDE_Caliper"))
-      
+
       # estimators with RFCDE pairs, RFCDE estimator
       e_RFCDE <- bias_corrected_estimator(test, RFCDE_pairs, p_mat_RFCDE, 0.1)
       var_RFCDE <- variance_bias_corrected(test, RFCDE_pairs, p_mat_RFCDE, e_RFCDE, 0.1)
@@ -846,13 +834,7 @@ registerDoParallel(numcores - 6)
       coverage_naive <- coverage_check(CI_naive, lambda)
       MOE_naive <- qnorm(0.975) * sqrt(var_naive)
       temp_data <- rbind(temp_data, c(lambda, e_naive, MOE_naive, CI_naive, coverage_naive, "Naive", "linCDE_Caliper"))
-      
-      # estimators with linCDE pairs, mike estimator
-      confint_mike <- CI_mike(test, linCDE_pairs)
-      coverage_mike <- coverage_check(confint_mike, lambda)
-      MOE_mike <- (confint_mike[2] - confint_mike[1])/2
-      temp_data <- rbind(temp_data, c(lambda, e_naive, MOE_mike, confint_mike, coverage_mike, "Mike", "linCDE_Caliper"))
-      
+
       # estimators with linCDE pairs, RFCDE estimator
       e_RFCDE <- bias_corrected_estimator(test, linCDE_pairs, p_mat_RFCDE, 0.1)
       var_RFCDE <- variance_bias_corrected(test, linCDE_pairs, p_mat_RFCDE, e_RFCDE, 0.1)
@@ -887,13 +869,7 @@ registerDoParallel(numcores - 6)
       coverage_naive <- coverage_check(CI_naive, lambda)
       MOE_naive <- qnorm(0.975) * sqrt(var_naive)
       temp_data <- rbind(temp_data, c(lambda, e_naive, MOE_naive, CI_naive, coverage_naive, "Naive", "model_Caliper"))
-      
-      # estimators with model pairs, mike estimator
-      confint_mike <- CI_mike(test, model_pairs)
-      coverage_mike <- coverage_check(confint_mike, lambda)
-      MOE_mike <- (confint_mike[2] - confint_mike[1])/2
-      temp_data <- rbind(temp_data, c(lambda, e_naive, MOE_mike, confint_mike, coverage_mike, "Mike", "model_Caliper"))
-      
+
       # estimators with model pairs, RFCDE estimator
       e_RFCDE <- bias_corrected_estimator(test, model_pairs, p_mat_RFCDE, 0.1)
       var_RFCDE <- variance_bias_corrected(test, model_pairs, p_mat_RFCDE, e_RFCDE, 0.1)
@@ -930,15 +906,6 @@ registerDoParallel(numcores - 6)
 # Now, we'll compile the results of our simulation
 
 output[, -c(7, 8)] <- lapply(output[, -c(7, 8)], as.numeric)
-
-for(i in 1:(nrow(output)/5)){
-  agg_CI <- data.frame("lower_CI" = output[(5*i - 2):(5*i), 2] - output[(5*i - 4), 3], "upper_CI" = output[(5*i - 2):(5*i), 2] + output[(5*i - 4), 3])
-  agg_CI <- cbind(agg_CI, "coverage" = ifelse(agg_CI[, 1] < output[(5*i - 4), 1] & agg_CI[, 2] > output[(5*i - 4), 1], 1, 0))
-  add_CI <- do.call("cbind", list(output[(5*i - 2):(5*i), 1:2], "MOE" = rep(output[(5*i - 4), 3], 3), agg_CI, output[(5*i - 2):(5*i), 7:8]))
-  add_CI$estimation_method <- c("RFCDE_agg", "linCDE_agg", "model_agg")
-  output <- rbind(output, add_CI)
-}
-
 write.csv(output, "sim_output.csv")
 
 matching_method_vector <- unique(output$matching_method)
@@ -955,10 +922,8 @@ for(i in 1:length(matching_method_vector)){
     root_MSE <- sqrt(mean((subdata[, 1] - subdata[, 2])^2))
     MOE_average <- mean(subdata[, 3])
     coverage_rate <- mean(subdata[, 6])
-    
     summary_data <- rbind(summary_data, c(matching_method_vector[i], estimation_method_vector[m], 
                                           mean_abs_error, root_MSE, MOE_average, coverage_rate))
-    
   } 
 }
 
@@ -1053,7 +1018,7 @@ write.csv(average_histograms[2, ], "average_hist_linCDE.csv")
 write.csv(average_histograms[3, ], "average_hist_RFCDE.csv")
 write.csv(average_histograms[4, ], "average_hist_model.csv")
 
-# Simulation 2 Estimation and Inference (MAE, RMSE, ML, CR) -------------------------------
+# Simulation 2 Estimation and Inference (supplementary materials) -------------------------------
 set.seed(12345)
 iter = 1000
 sample_size <- 1000
@@ -1142,12 +1107,6 @@ for(k in 1:(iter/10)){
       MOE_naive <- qnorm(0.975) * sqrt(var_naive)
       temp_data <- rbind(temp_data, c(lambda, e_naive, MOE_naive, CI_naive, coverage_naive, "Naive", "Mahalanobis"))
       
-      # estimators with mahalanobis only pairs, mike estimator
-      confint_mike <- CI_mike(test, mahalanobis_pairs)
-      coverage_mike <- coverage_check(confint_mike, lambda)
-      MOE_mike <- (confint_mike[2] - confint_mike[1])/2
-      temp_data <- rbind(temp_data, c(lambda, e_naive, MOE_mike, confint_mike, coverage_mike, "Mike", "Mahalanobis"))
-      
       # estimators with mahalanobis only pairs, RFCDE estimator
       e_RFCDE <- bias_corrected_estimator(test, mahalanobis_pairs, p_mat_RFCDE, 0.1)
       var_RFCDE <- variance_bias_corrected(test, mahalanobis_pairs, p_mat_RFCDE, e_RFCDE, 0.1)
@@ -1182,12 +1141,6 @@ for(k in 1:(iter/10)){
       coverage_naive <- coverage_check(CI_naive, lambda)
       MOE_naive <- qnorm(0.975) * sqrt(var_naive)
       temp_data <- rbind(temp_data, c(lambda, e_naive, MOE_naive, CI_naive, coverage_naive, "Naive", "RFCDE_Caliper"))
-      
-      # estimators with mahalanobis only pairs, mike estimator
-      confint_mike <- CI_mike(test, RFCDE_pairs)
-      coverage_mike <- coverage_check(confint_mike, lambda)
-      MOE_mike <- (confint_mike[2] - confint_mike[1])/2
-      temp_data <- rbind(temp_data, c(lambda, e_naive, MOE_mike, confint_mike, coverage_mike, "Mike", "RFCDE_Caliper"))
       
       # estimators with RFCDE pairs, RFCDE estimator
       e_RFCDE <- bias_corrected_estimator(test, RFCDE_pairs, p_mat_RFCDE, 0.1)
@@ -1224,12 +1177,6 @@ for(k in 1:(iter/10)){
       MOE_naive <- qnorm(0.975) * sqrt(var_naive)
       temp_data <- rbind(temp_data, c(lambda, e_naive, MOE_naive, CI_naive, coverage_naive, "Naive", "linCDE_Caliper"))
       
-      # estimators with mahalanobis only pairs, mike estimator
-      confint_mike <- CI_mike(test, linCDE_pairs)
-      coverage_mike <- coverage_check(confint_mike, lambda)
-      MOE_mike <- (confint_mike[2] - confint_mike[1])/2
-      temp_data <- rbind(temp_data, c(lambda, e_naive, MOE_mike, confint_mike, coverage_mike, "Mike", "linCDE_Caliper"))
-      
       # estimators with linCDE pairs, RFCDE estimator
       e_RFCDE <- bias_corrected_estimator(test, linCDE_pairs, p_mat_RFCDE, 0.1)
       var_RFCDE <- variance_bias_corrected(test, linCDE_pairs, p_mat_RFCDE, e_RFCDE, 0.1)
@@ -1264,12 +1211,6 @@ for(k in 1:(iter/10)){
       coverage_naive <- coverage_check(CI_naive, lambda)
       MOE_naive <- qnorm(0.975) * sqrt(var_naive)
       temp_data <- rbind(temp_data, c(lambda, e_naive, MOE_naive, CI_naive, coverage_naive, "Naive", "model_Caliper"))
-      
-      # estimators with mahalanobis only pairs, mike estimator
-      confint_mike <- CI_mike(test, model_pairs)
-      coverage_mike <- coverage_check(confint_mike, lambda)
-      MOE_mike <- (confint_mike[2] - confint_mike[1])/2
-      temp_data <- rbind(temp_data, c(lambda, e_naive, MOE_mike, confint_mike, coverage_mike, "Mike", "model_Caliper"))
       
       # estimators with model pairs, RFCDE estimator
       e_RFCDE <- bias_corrected_estimator(test, model_pairs, p_mat_RFCDE, 0.1)
@@ -2152,3 +2093,640 @@ stopImplicitCluster()
 average_histogram_cauchy <- colMeans(output)
 hist(average_histogram_cauchy)
 write.csv(average_histogram_cauchy, "average_hist_cauchy_error.csv")
+
+#### Appendix E ----------------------------------------------------------------
+
+# Simulation E.1 Estimation and Inference (MAE, RMSE, ML, CR) --------------------
+
+#### nbp_weighted: weights the (i, j)th entry in the distance matrix by 
+# (z_i - z_j)^2. Used for Appendix D.
+#### nbp_weighted_caliper: also implements our caliper with the nbp_weighted
+# matching scheme. 
+
+nbp_weighted <- function(data, cutoff){
+  # dataframe data: data generated from generate_data_dose function
+  # double cutoff: function returns NULL if the standardized difference in 
+  # covariates is larger than the cutoff for at least one covariate
+  
+  # the next set of lines uses the nbpMatch library to create matched pairs
+  # for data based on mahalanobis distance of covariates.
+  test.dist <- gendistance(data[, c(1, 3:ncol(data))], idcol = 1)
+  test.mdm <- distancematrix(test.dist)
+  
+  z_weight <- matrix(1, ncol = nrow(data), nrow = nrow(data))
+  for(i in 1:(nrow(data)-1)){
+    for(j in (i+1):nrow(data)){
+      z_weight[i, j] <- (data[i, 1] - data[j, 1])^2
+      z_weight[j, i] <- (data[i, 1] - data[j, 1])^2
+    }
+  }
+  z_weight <- (0.01 + z_weight) / (0.01 + min(z_weight))
+  
+  test.match <- nonbimatch(distancematrix(test.mdm / z_weight))
+  matches <- test.match$matches
+  matches$group <- ifelse(as.numeric(matches$Group1.ID) < as.numeric(matches$Group2.ID), "L", "H")
+  high_groups <- matches[which(matches$group == "H"), 2]
+  low_groups <- matches[which(matches$group == "L"), 2]
+  
+  # the next section of code checks the standardized covariate difference between
+  # the low-dose and high-dose groups. If there is at least one coviarate that has
+  # a standardized difference larger that cutoff, we will not return the matched
+  # pairs generated.
+  standard_differences <- 1:(ncol(data) - 2)
+  sigmas <- 1:(ncol(data) - 2)
+  
+  for(i in 3:ncol(data)){
+    xbar_before <- sum(data[, i])/nrow(data)
+    sigma_before <- sqrt(sum((data[, i] - xbar_before)^2)/(nrow(data) - 1))
+    xbar_high <- sum(data[which(row.names(data) %in% high_groups), i]) / nrow(data[which(row.names(data) %in% high_groups), ])
+    xbar_low <- sum(data[which(row.names(data) %in% low_groups), i]) / nrow(data[which(row.names(data) %in% low_groups), ])
+    
+    standard_differences[i-2] <- abs((xbar_high - xbar_low) / sigma_before)
+    sigmas[i-2] <- sigma_before
+  }
+  
+  standardization_fail <- ifelse(max(standard_differences) > cutoff, TRUE, FALSE)
+  balanced_pairs <- as.data.frame(matrix(nrow = 0, ncol = 2))
+  
+  # if our matched pairs are sufficiently well balanced, we will return the set
+  # of matched pairs. If the set of matched pairs are not balanced on covariates,
+  # an empty dataframe will be returned
+  if(standardization_fail == FALSE){
+    
+    high_data <- matches[which(matches$group == "H"), ]
+    balanced_pairs <- high_data[, c(2, 4)]
+    
+  }
+  
+  # the matched pairs we return will always have the higher-dose observation
+  # on the first column and the low-dose observation on the second column.
+  names(balanced_pairs) <- c("High", "Low")
+  output <- list("pairs" = balanced_pairs, "standardized_diffs" = standard_differences)
+  
+  return(output)
+  
+}
+nbp_weighted_caliper <- function(data, p_matrix, delta){
+  # dataframe data: The data we want to make matches for
+  # matrix p_matrix: matrix containing probability of observed treatment
+  # assignment for each pair of observations
+  # double delta: used for the propensity caliper
+  
+  # matrix encoding our caliper penalty
+  caliper_matrix <- matrix(0, nrow = nrow(data), ncol = nrow(data))
+  
+  for(i in 1:(nrow(data)-1)){
+    for(j in (i+1):nrow(data)){
+      
+      # if probability of observed treatment assignment is extreme, enforce
+      # infinite penalty on distance matrix
+      caliper_matrix[i, j] <- ifelse(p_matrix[i, j] > (1-delta) | p_matrix[i, j] < delta, Inf, 0)
+      caliper_matrix[j, i] <- caliper_matrix[i, j]
+      
+    }
+  }
+  
+  # making mahalanobis distance matrix
+  
+  test.dist <- gendistance(data[, c(1, 3:ncol(data))], idcol = 1)
+  test.mdm <- distancematrix(test.dist)
+  
+  # applying caliper to mahalnobis distance matrix
+  
+  z_weight <- matrix(1, ncol = nrow(data), nrow = nrow(data))
+  for(i in 1:(nrow(data)-1)){
+    for(j in (i+1):nrow(data)){
+      z_weight[i, j] <- (data[i, 1] - data[j, 1])^2
+      z_weight[j, i] <- (data[i, 1] - data[j, 1])^2
+    }
+  }
+  
+  z_weight <- (0.01 + z_weight) / (0.01 + min(z_weight))
+  
+  caliper_dist_matrix <- distancematrix((test.mdm/z_weight) + caliper_matrix)
+  test.match <- nonbimatch(caliper_dist_matrix)
+  matches <- test.match$matches
+  matches$group <- ifelse(as.numeric(matches$Group1.ID) < as.numeric(matches$Group2.ID), "L", "H")
+  high_groups <- matches[which(matches$group == "H"), 2]
+  low_groups <- matches[which(matches$group == "L"), 2]
+  
+  # calculates standardized covariate differences, if we want to compare the 
+  # standardized covariate difference between mahalanobis-only matching and
+  # calipered-matching
+  standard_differences <- 1:(ncol(data) - 3)
+  sigmas <- 1:(ncol(data) - 3)
+  
+  for(i in 3:ncol(data)){
+    xbar_before <- sum(data[, i])/nrow(data)
+    sigma_before <- sqrt(sum((data[, i] - xbar_before)^2)/(nrow(data) - 1))
+    xbar_high <- sum(data[which(row.names(data) %in% high_groups), i]) / nrow(data[which(row.names(data) %in% high_groups), ])
+    xbar_low <- sum(data[which(row.names(data) %in% low_groups), i]) / nrow(data[which(row.names(data) %in% low_groups), ])
+    
+    standard_differences[i-2] <- abs((xbar_high - xbar_low) / sigma_before)
+    sigmas[i-2] <- sigma_before
+  }
+  
+  balanced_pairs <- as.data.frame(matrix(nrow = 0, ncol = 2))
+  high_data <- matches[which(matches$group == "H"), ]
+  balanced_pairs <- high_data[, c(2, 4)]
+  names(balanced_pairs) <- c("High", "Low")
+  
+  output <- list("pairs" = balanced_pairs, "standardized_diffs" = standard_differences)
+  
+  return(output)  
+}
+
+
+set.seed(12345)
+iter = 1000
+sample_size <- 1000
+data_list <- list()
+mahalanobis_pairs_list <- list()
+successful_matching <- 0
+covariate_balance <- data.frame(matrix(0, nrow = iter, ncol = 5))
+
+while(successful_matching < iter){
+  
+  # generate data with specified sample size
+  test <- generate_data_dose(N = sample_size)
+  
+  # create matched pairs based on mahalanobis-only matching
+  matched_pairs <- nbp_weighted(test, 0.6)
+  
+  # nrow(matched_pairs$pairs) == 0 only if the set of matched pairs violate the
+  # balancing criteria specified (here, we use a cutoff of 0.2)
+  if(nrow(matched_pairs$pairs) > 0){
+    
+    # If our matched pairs are well balanced, we'll save this dataset for future
+    # use, as well as the mahalanobis-only matched pairs we generated.
+    data_list <- append(data_list, test)
+    mahalanobis_pairs_list <- append(mahalanobis_pairs_list, matched_pairs$pairs)
+    covariate_balance[successful_matching + 1, ] <- matched_pairs$standardized_diffs
+    successful_matching <- successful_matching + 1
+    
+  }
+  
+  # Progress check - we'll be notified after every 100 datasets / matched pairs 
+  # are successfully made (pass the balance criteria)
+  #if(successful_matching %% 100 == 0){
+  #  print(successful_matching)
+  #}
+  
+  print(successful_matching)
+  
+}
+
+write.csv(covariate_balance, "covariate_balance_sim1_weighted.csv")
+
+# Parallelization setup
+numcores <- detectCores()
+output <- data.frame(matrix(nrow = 0, ncol = 8))
+registerDoParallel(numcores - 6)
+
+# now, we create matched pairs and estimate treatment effects with each matching
+# and estimation method we're interested in.
+
+output <- foreach(i = 1:iter, .combine = rbind,
+                        .packages = c("nbpMatching",
+                                      "RFCDE",
+                                      "randomForest",
+                                      "earth")) %dopar%
+  {
+    # holds true lambda and estimates in dataframe
+    temp_data <- as.data.frame(matrix(nrow = 0, ncol = 8))
+    
+    # extracts ith dataframe from the data list
+    test <- as.data.frame(data_list[(7*(i-1) + 1):(7*i)])
+    
+    # creates p matrices, used for matching and estimation methods
+    p_mat_linCDE <- propensity_matrix_linCDE(test)
+    p_mat_RFCDE <- propensity_matrix_RFCDE(test)
+    p_mat_model <- propensity_matrix_model(test)
+    
+    # creates matched pairs 
+    mahalanobis_pairs <- as.data.frame(mahalanobis_pairs_list[((2*i) - 1):(2*i)])
+    RFCDE_pairs <- nbp_weighted_caliper(test, p_mat_RFCDE, 0.1)$pairs
+    linCDE_pairs <- nbp_weighted_caliper(test, p_mat_linCDE, 0.1)$pairs
+    model_pairs <- nbp_weighted_caliper(test, p_mat_model, 0.1)$pairs
+    
+    ######################################################################################################################
+    
+    # estimators with mahalanobis only pairs, naive estimator
+    lambda <- true_lambda(test, mahalanobis_pairs)
+    e_naive <- naive_estimator(test, mahalanobis_pairs)
+    var_naive <- variance_naive(test, mahalanobis_pairs, e_naive)
+    CI_naive <- CI_maker(e_naive, 0.05, var_naive)
+    coverage_naive <- coverage_check(CI_naive, lambda)
+    MOE_naive <- qnorm(0.975) * sqrt(var_naive)
+    temp_data <- rbind(temp_data, c(lambda, e_naive, MOE_naive, CI_naive, coverage_naive, "Naive", "Mahalanobis"))
+    
+    
+    # estimators with mahalanobis only pairs, RFCDE estimator
+    e_RFCDE <- bias_corrected_estimator(test, mahalanobis_pairs, p_mat_RFCDE, 0.1)
+    var_RFCDE <- variance_bias_corrected(test, mahalanobis_pairs, p_mat_RFCDE, e_RFCDE, 0.1)
+    CI_RFCDE <- CI_maker(e_RFCDE, 0.05, var_RFCDE)
+    coverage_RFCDE <- coverage_check(CI_RFCDE, lambda)
+    MOE_RFCDE <- qnorm(0.975) * sqrt(var_RFCDE)
+    temp_data <- rbind(temp_data, c(lambda, e_RFCDE, MOE_RFCDE, CI_RFCDE, coverage_RFCDE, "RFCDE", "Mahalanobis"))
+    
+    # estimators with mahalanobis only pairs, linCDE estimator
+    e_linCDE <- bias_corrected_estimator(test, mahalanobis_pairs, p_mat_linCDE, 0.1)
+    var_linCDE <- variance_bias_corrected(test, mahalanobis_pairs, p_mat_linCDE, e_linCDE, 0.1)
+    CI_linCDE <- CI_maker(e_linCDE, 0.05, var_linCDE)
+    coverage_linCDE <- coverage_check(CI_linCDE, lambda)
+    MOE_linCDE <- qnorm(0.975) * sqrt(var_linCDE)
+    temp_data <- rbind(temp_data, c(lambda, e_linCDE, MOE_linCDE, CI_linCDE, coverage_linCDE, "linCDE", "Mahalanobis"))
+    
+    # estimators with mahalanobis only pairs, model estimator
+    e_model <- bias_corrected_estimator(test, mahalanobis_pairs, p_mat_model, 0.1)
+    var_model <- variance_bias_corrected(test, mahalanobis_pairs, p_mat_model, e_model, 0.1)
+    CI_model <- CI_maker(e_model, 0.05, var_model)
+    coverage_model <- coverage_check(CI_model, lambda)
+    MOE_model <- qnorm(0.975) * sqrt(var_model)
+    temp_data <- rbind(temp_data, c(lambda, e_model, MOE_model, CI_model, coverage_model, "model", "Mahalanobis"))    
+    
+    ######################################################################################################################
+    
+    # estimators with RFCDE pairs, naive estimator
+    lambda <- true_lambda(test, RFCDE_pairs)
+    e_naive <- naive_estimator(test, RFCDE_pairs)
+    var_naive <- variance_naive(test, RFCDE_pairs, e_naive)
+    CI_naive <- CI_maker(e_naive, 0.05, var_naive)
+    coverage_naive <- coverage_check(CI_naive, lambda)
+    MOE_naive <- qnorm(0.975) * sqrt(var_naive)
+    temp_data <- rbind(temp_data, c(lambda, e_naive, MOE_naive, CI_naive, coverage_naive, "Naive", "RFCDE_Caliper"))
+    
+    # estimators with RFCDE pairs, RFCDE estimator
+    e_RFCDE <- bias_corrected_estimator(test, RFCDE_pairs, p_mat_RFCDE, 0.1)
+    var_RFCDE <- variance_bias_corrected(test, RFCDE_pairs, p_mat_RFCDE, e_RFCDE, 0.1)
+    CI_RFCDE <- CI_maker(e_RFCDE, 0.05, var_RFCDE)
+    coverage_RFCDE <- coverage_check(CI_RFCDE, lambda)
+    MOE_RFCDE <- qnorm(0.975) * sqrt(var_RFCDE)
+    temp_data <- rbind(temp_data, c(lambda, e_RFCDE, MOE_RFCDE, CI_RFCDE, coverage_RFCDE, "RFCDE", "RFCDE_Caliper"))
+    
+    # estimators with RFCDE pairs, RFCDE estimator
+    e_linCDE <- bias_corrected_estimator(test, RFCDE_pairs, p_mat_linCDE, 0.1)
+    var_linCDE <- variance_bias_corrected(test, RFCDE_pairs, p_mat_linCDE, e_linCDE, 0.1)
+    CI_linCDE <- CI_maker(e_linCDE, 0.05, var_linCDE)
+    coverage_linCDE <- coverage_check(CI_linCDE, lambda)
+    MOE_linCDE <- qnorm(0.975) * sqrt(var_linCDE)
+    temp_data <- rbind(temp_data, c(lambda, e_linCDE, MOE_linCDE, CI_linCDE, coverage_linCDE, "linCDE", "RFCDE_Caliper"))
+    
+    # estimators with RFCDE pairs, linCDE estimator
+    e_model <- bias_corrected_estimator(test, RFCDE_pairs, p_mat_model, 0.1)
+    var_model <- variance_bias_corrected(test, RFCDE_pairs, p_mat_model, e_model, 0.1)
+    CI_model <- CI_maker(e_model, 0.05, var_model)
+    coverage_model <- coverage_check(CI_model, lambda)
+    MOE_model <- qnorm(0.975) * sqrt(var_model)
+    temp_data <- rbind(temp_data, c(lambda, e_model, MOE_model, CI_model, coverage_model, "model", "RFCDE_Caliper"))    
+    
+    ######################################################################################################################
+    
+    # estimators with linCDE pairs, naive estimator
+    lambda <- true_lambda(test, linCDE_pairs)
+    e_naive <- naive_estimator(test, linCDE_pairs)
+    var_naive <- variance_naive(test, linCDE_pairs, e_naive)
+    CI_naive <- CI_maker(e_naive, 0.05, var_naive)
+    coverage_naive <- coverage_check(CI_naive, lambda)
+    MOE_naive <- qnorm(0.975) * sqrt(var_naive)
+    temp_data <- rbind(temp_data, c(lambda, e_naive, MOE_naive, CI_naive, coverage_naive, "Naive", "linCDE_Caliper"))
+    
+    # estimators with linCDE pairs, RFCDE estimator
+    e_RFCDE <- bias_corrected_estimator(test, linCDE_pairs, p_mat_RFCDE, 0.1)
+    var_RFCDE <- variance_bias_corrected(test, linCDE_pairs, p_mat_RFCDE, e_RFCDE, 0.1)
+    CI_RFCDE <- CI_maker(e_RFCDE, 0.05, var_RFCDE)
+    coverage_RFCDE <- coverage_check(CI_RFCDE, lambda)
+    MOE_RFCDE <- qnorm(0.975) * sqrt(var_RFCDE)
+    temp_data <- rbind(temp_data, c(lambda, e_RFCDE, MOE_RFCDE, CI_RFCDE, coverage_RFCDE, "RFCDE", "linCDE_Caliper"))
+    
+    # estimators with linCDE pairs, linCDE estimator
+    e_linCDE <- bias_corrected_estimator(test, linCDE_pairs, p_mat_linCDE, 0.1)
+    var_linCDE <- variance_bias_corrected(test, linCDE_pairs, p_mat_linCDE, e_linCDE, 0.1)
+    CI_linCDE <- CI_maker(e_linCDE, 0.05, var_linCDE)
+    coverage_linCDE <- coverage_check(CI_linCDE, lambda)
+    MOE_linCDE <- qnorm(0.975) * sqrt(var_linCDE)
+    temp_data <- rbind(temp_data, c(lambda, e_linCDE, MOE_linCDE, CI_linCDE, coverage_linCDE, "linCDE", "linCDE_Caliper"))
+    
+    # estimators with linCDE pairs, model estimator
+    e_model <- bias_corrected_estimator(test, linCDE_pairs, p_mat_model, 0.1)
+    var_model <- variance_bias_corrected(test, linCDE_pairs, p_mat_model, e_model, 0.1)
+    CI_model <- CI_maker(e_model, 0.05, var_model)
+    coverage_model <- coverage_check(CI_model, lambda)
+    MOE_model <- qnorm(0.975) * sqrt(var_model)
+    temp_data <- rbind(temp_data, c(lambda, e_model, MOE_model, CI_model, coverage_model, "model", "linCDE_Caliper"))  
+    
+    ######################################################################################################################
+    
+    # estimators with model pairs, naive estimator
+    lambda <- true_lambda(test, model_pairs)
+    e_naive <- naive_estimator(test, model_pairs)
+    var_naive <- variance_naive(test, model_pairs, e_naive)
+    CI_naive <- CI_maker(e_naive, 0.05, var_naive)
+    coverage_naive <- coverage_check(CI_naive, lambda)
+    MOE_naive <- qnorm(0.975) * sqrt(var_naive)
+    temp_data <- rbind(temp_data, c(lambda, e_naive, MOE_naive, CI_naive, coverage_naive, "Naive", "model_Caliper"))
+    
+    # estimators with model pairs, RFCDE estimator
+    e_RFCDE <- bias_corrected_estimator(test, model_pairs, p_mat_RFCDE, 0.1)
+    var_RFCDE <- variance_bias_corrected(test, model_pairs, p_mat_RFCDE, e_RFCDE, 0.1)
+    CI_RFCDE <- CI_maker(e_RFCDE, 0.05, var_RFCDE)
+    coverage_RFCDE <- coverage_check(CI_RFCDE, lambda)
+    MOE_RFCDE <- qnorm(0.975) * sqrt(var_RFCDE)
+    temp_data <- rbind(temp_data, c(lambda, e_RFCDE, MOE_RFCDE, CI_RFCDE, coverage_RFCDE, "RFCDE", "model_Caliper"))
+    
+    # estimators with model pairs, linCDE estimator
+    e_linCDE <- bias_corrected_estimator(test, model_pairs, p_mat_linCDE, 0.1)
+    var_linCDE <- variance_bias_corrected(test, model_pairs, p_mat_linCDE, e_linCDE, 0.1)
+    CI_linCDE <- CI_maker(e_linCDE, 0.05, var_linCDE)
+    coverage_linCDE <- coverage_check(CI_linCDE, lambda)
+    MOE_linCDE <- qnorm(0.975) * sqrt(var_linCDE)
+    temp_data <- rbind(temp_data, c(lambda, e_linCDE, MOE_linCDE, CI_linCDE, coverage_linCDE, "linCDE", "model_Caliper"))
+    
+    # estimators with model pairs, model estimator
+    e_model <- bias_corrected_estimator(test, model_pairs, p_mat_model, 0.1)
+    var_model <- variance_bias_corrected(test, model_pairs, p_mat_model, e_model, 0.1)
+    CI_model <- CI_maker(e_model, 0.05, var_model)
+    coverage_model <- coverage_check(CI_model, lambda)
+    MOE_model <- qnorm(0.975) * sqrt(var_model)
+    temp_data <- rbind(temp_data, c(lambda, e_model, MOE_model, CI_model, coverage_model, "model", "model_Caliper"))     
+    names(temp_data) <- c("lambda", "estimate", "MOE", "lower_CI", "upper_CI", "coverage", "estimation_method", "matching_method")
+    
+    return(temp_data)
+    
+  }
+
+stopImplicitCluster()
+output[, -c(7, 8)] <- lapply(output[, -c(7, 8)], as.numeric)
+
+write.csv(output, "sim_weighted_output.csv")
+
+matching_method_vector <- unique(output$matching_method)
+estimation_method_vector <- unique(output$estimation_method)
+summary_data <- data.frame(matrix(nrow = 0, ncol = 4))
+for(i in 1:length(matching_method_vector)){
+  
+  method_data <- output[which(output$matching_method == matching_method_vector[i]), ]
+  
+  for(m in 1:length(estimation_method_vector)){
+    
+    subdata <- method_data[which(method_data$estimation_method == estimation_method_vector[m]), ]
+    mean_abs_error <- mean(subdata[, 2] - subdata[, 1])
+    root_MSE <- sqrt(mean((subdata[, 1] - subdata[, 2])^2))
+    MOE_average <- mean(subdata[, 3])
+    coverage_rate <- mean(subdata[, 6])
+    
+    summary_data <- rbind(summary_data, c(matching_method_vector[i], estimation_method_vector[m], 
+                                          mean_abs_error, root_MSE, MOE_average, coverage_rate))
+    
+  } 
+}
+
+summary_data[, -c(1, 2)] <- lapply(summary_data[, -c(1, 2)], as.numeric)
+summary_data[, 5] <- 2*summary_data[, 5]
+names(summary_data) <- c("Matching_Method", "Estimation_Method","Mean_Error", "RMSE", "Average_Length", "Coverage_Rate")
+
+write.csv(summary_data, "sim_weighted_summary.csv")
+
+
+balance_tab <- read.csv("covariate_balance_sim1_weighted.csv")[, -1]
+mean_balance <- data.frame(as.list(round_df(colMeans(balance_tab), 3)))
+kbl(mean_balance, align = 'c', booktabs = T, format = "latex", row.names = FALSE,
+    caption = "Balance Table, First Simulation", position = "H") %>%
+  kable_classic(full_width = F, html_font = "Cambria")
+
+#### Appendix (blank)
+# Simulation E.2 Estimation and Inference (MAE, RMSE, ML, CR) --------------------
+
+nbp_pn_weight <- function(data, p_matrix, M, cutoff){
+  # dataframe data: data generated from generate_data_dose function
+  # double cutoff: function returns NULL if the standardized difference in 
+  # covariates is larger than the cutoff for at least one covariate
+  
+  # the next set of lines uses the nbpMatch library to create matched pairs
+  # for data based on mahalanobis distance of covariates.
+  
+  pn_matrix <- matrix(0, nrow = nrow(data), ncol = nrow(data))
+  
+  for(i in 1:(nrow(data)-1)){
+    for(j in (i+1):nrow(data)){
+      
+      # if probability of observed treatment assignment is extreme, enforce
+      # infinite penalty on distance matrix
+      pn_matrix[i, j] <- M*(p_matrix[i, j] - 0.5)^2
+      pn_matrix[j, i] <- pn_matrix[i, j]
+      
+    }
+  }
+  
+  # making mahalanobis distance matrix
+  
+  test.dist <- gendistance(data[, c(1, 3:ncol(data))], idcol = 1)
+  test.mdm <- distancematrix(test.dist)
+  
+  # applying caliper to mahalnobis distance matrix
+  
+  pn_dist_matrix <- distancematrix(test.mdm + pn_matrix)
+  test.match <- nonbimatch(pn_dist_matrix)
+  matches <- test.match$matches
+  matches$group <- ifelse(as.numeric(matches$Group1.ID) < as.numeric(matches$Group2.ID), "L", "H")
+  high_groups <- matches[which(matches$group == "H"), 2]
+  low_groups <- matches[which(matches$group == "L"), 2]
+  
+  # the next section of code checks the standardized covariate difference between
+  # the low-dose and high-dose groups. If there is at least one coviarate that has
+  # a standardized difference larger that cutoff, we will not return the matched
+  # pairs generated.
+  standard_differences <- 1:(ncol(data) - 2)
+  sigmas <- 1:(ncol(data) - 2)
+  
+  for(i in 3:ncol(data)){
+    xbar_before <- sum(data[, i])/nrow(data)
+    sigma_before <- sqrt(sum((data[, i] - xbar_before)^2)/(nrow(data) - 1))
+    xbar_high <- sum(data[which(row.names(data) %in% high_groups), i]) / nrow(data[which(row.names(data) %in% high_groups), ])
+    xbar_low <- sum(data[which(row.names(data) %in% low_groups), i]) / nrow(data[which(row.names(data) %in% low_groups), ])
+    
+    standard_differences[i-2] <- abs((xbar_high - xbar_low) / sigma_before)
+    sigmas[i-2] <- sigma_before
+  }
+  
+  standardization_fail <- ifelse(max(standard_differences) > cutoff, TRUE, FALSE)
+  balanced_pairs <- as.data.frame(matrix(nrow = 0, ncol = 2))
+  
+  # if our matched pairs are sufficiently well balanced, we will return the set
+  # of matched pairs. If the set of matched pairs are not balanced on covariates,
+  # an empty dataframe will be returned
+  if(standardization_fail == FALSE){
+    
+    high_data <- matches[which(matches$group == "H"), ]
+    balanced_pairs <- high_data[, c(2, 4)]
+    
+  }
+  
+  # the matched pairs we return will always have the higher-dose observation
+  # on the first column and the low-dose observation on the second column.
+  names(balanced_pairs) <- c("High", "Low")
+  output <- list("pairs" = balanced_pairs, "standardized_diffs" = standard_differences)
+  
+  return(output)
+  
+}
+
+set.seed(12345)
+iter = 1000
+sample_size <- 1000
+data_list <- list()
+mahalanobis_pairs_list <- list()
+successful_matching <- 0
+covariate_balance <- data.frame(matrix(0, nrow = iter, ncol = 5))
+
+while(successful_matching < iter){
+  
+  # generate data with specified sample size
+  test <- generate_data_dose(N = sample_size)
+  
+  # create matched pairs based on mahalanobis-only matching
+  matched_pairs <- nbp_balanced(test, 0.2)
+  
+  # nrow(matched_pairs$pairs) == 0 only if the set of matched pairs violate the
+  # balancing criteria specified (here, we use a cutoff of 0.2)
+  if(nrow(matched_pairs$pairs) > 0){
+    
+    # If our matched pairs are well balanced, we'll save this dataset for future
+    # use, as well as the mahalanobis-only matched pairs we generated.
+    data_list <- append(data_list, test)
+    #covariate_balance[successful_matching + 1, ] <- matched_pairs$standardized_diffs
+    successful_matching <- successful_matching + 1
+    
+  }
+  
+  # Progress check - we'll be notified after every 100 datasets / matched pairs 
+  # are successfully made (pass the balance criteria)
+  if(successful_matching %% 100 == 0){
+    print(successful_matching)
+  }
+  
+  #print(successful_matching)
+  
+}
+
+#write.csv(covariate_balance, "covariate_balance_sim1_weighted.csv")
+
+# Parallelization setup
+numcores <- detectCores()
+output <- data.frame(matrix(nrow = 0, ncol = 8))
+registerDoParallel(numcores - 6)
+
+# now, we create matched pairs and estimate treatment effects with each matching
+# and estimation method we're interested in.
+
+output <- foreach(i = 1:iter, .combine = rbind,
+                        .packages = c("nbpMatching",
+                                      "randomForest",
+                                      "earth")) %dopar%
+  {
+    # holds true lambda and estimates in dataframe
+    temp_data <- as.data.frame(matrix(nrow = 0, ncol = 8))
+    
+    # extracts ith dataframe from the data list
+    test <- as.data.frame(data_list[(7*(i-1) + 1):(7*i)])
+    
+    # creates p matrices, used for matching and estimation methods
+    p_mat_linCDE <- propensity_matrix_linCDE(test)
+    p_mat_model <- propensity_matrix_model(test)
+    
+    # creates matched pairs 
+    linCDE_pairs <- nbp_pn_weight(test, p_mat_linCDE, 5, 5)$pairs
+    model_pairs <- nbp_pn_weight(test,  p_mat_model, 5, 5)$pairs
+    
+    ######################################################################################################################
+    
+    # estimators with linCDE pairs, naive estimator
+    lambda <- true_lambda(test, linCDE_pairs)
+    e_naive <- naive_estimator(test, linCDE_pairs)
+    var_naive <- variance_naive(test, linCDE_pairs, e_naive)
+    CI_naive <- CI_maker(e_naive, 0.05, var_naive)
+    coverage_naive <- coverage_check(CI_naive, lambda)
+    MOE_naive <- qnorm(0.975) * sqrt(var_naive)
+    temp_data <- rbind(temp_data, c(lambda, e_naive, MOE_naive, CI_naive, coverage_naive, "Naive", "linCDE"))
+    
+    # estimators with linCDE pairs, linCDE estimator
+    e_linCDE <- bias_corrected_estimator(test, linCDE_pairs, p_mat_linCDE, 0.1)
+    var_linCDE <- variance_bias_corrected(test, linCDE_pairs, p_mat_linCDE, e_linCDE, 0.1)
+    CI_linCDE <- CI_maker(e_linCDE, 0.05, var_linCDE)
+    coverage_linCDE <- coverage_check(CI_linCDE, lambda)
+    MOE_linCDE <- qnorm(0.975) * sqrt(var_linCDE)
+    temp_data <- rbind(temp_data, c(lambda, e_linCDE, MOE_linCDE, CI_linCDE, coverage_linCDE, "linCDE", "linCDE"))
+    
+    # estimators with linCDE pairs, model estimator
+    e_model <- bias_corrected_estimator(test, linCDE_pairs, p_mat_model, 0.1)
+    var_model <- variance_bias_corrected(test, linCDE_pairs, p_mat_model, e_model, 0.1)
+    CI_model <- CI_maker(e_model, 0.05, var_model)
+    coverage_model <- coverage_check(CI_model, lambda)
+    MOE_model <- qnorm(0.975) * sqrt(var_model)
+    temp_data <- rbind(temp_data, c(lambda, e_model, MOE_model, CI_model, coverage_model, "model", "linCDE"))    
+    
+    ######################################################################################################################
+    
+    # estimators with model pairs, naive estimator
+    lambda <- true_lambda(test, model_pairs)
+    e_naive <- naive_estimator(test, model_pairs)
+    var_naive <- variance_naive(test, model_pairs, e_naive)
+    CI_naive <- CI_maker(e_naive, 0.05, var_naive)
+    coverage_naive <- coverage_check(CI_naive, lambda)
+    MOE_naive <- qnorm(0.975) * sqrt(var_naive)
+    temp_data <- rbind(temp_data, c(lambda, e_naive, MOE_naive, CI_naive, coverage_naive, "Naive", "model"))
+    
+    # estimators with modelpairs, linCDE estimator
+    e_linCDE <- bias_corrected_estimator(test, model_pairs, p_mat_linCDE, 0.1)
+    var_linCDE <- variance_bias_corrected(test, model_pairs, p_mat_linCDE, e_linCDE, 0.1)
+    CI_linCDE <- CI_maker(e_linCDE, 0.05, var_linCDE)
+    coverage_linCDE <- coverage_check(CI_linCDE, lambda)
+    MOE_linCDE <- qnorm(0.975) * sqrt(var_linCDE)
+    temp_data <- rbind(temp_data, c(lambda, e_linCDE, MOE_linCDE, CI_linCDE, coverage_linCDE, "linCDE", "model"))
+    
+    # estimators with model pairs, model estimator
+    e_model <- bias_corrected_estimator(test, model_pairs, p_mat_model, 0.1)
+    var_model <- variance_bias_corrected(test, model_pairs, p_mat_model, e_model, 0.1)
+    CI_model <- CI_maker(e_model, 0.05, var_model)
+    coverage_model <- coverage_check(CI_model, lambda)
+    MOE_model <- qnorm(0.975) * sqrt(var_model)
+    temp_data <- rbind(temp_data, c(lambda, e_model, MOE_model, CI_model, coverage_model, "model", "model"))    
+ 
+    names(temp_data) <- c("lambda", "estimate", "MOE", "lower_CI", "upper_CI", "coverage", "estimation_method", "matching_method")
+    
+    return(temp_data)
+    
+  }
+
+stopImplicitCluster()
+output[, -c(7, 8)] <- lapply(output[, -c(7, 8)], as.numeric)
+
+write.csv(output, "sim_pn_weight_output.csv")
+
+matching_method_vector <- unique(output$matching_method)
+estimation_method_vector <- unique(output$estimation_method)
+summary_data <- data.frame(matrix(nrow = 0, ncol = 4))
+for(i in 1:length(matching_method_vector)){
+  
+  method_data <- output[which(output$matching_method == matching_method_vector[i]), ]
+  
+  for(m in 1:length(estimation_method_vector)){
+    
+    subdata <- method_data[which(method_data$estimation_method == estimation_method_vector[m]), ]
+    mean_abs_error <- mean(subdata[, 2] - subdata[, 1])
+    root_MSE <- sqrt(mean((subdata[, 1] - subdata[, 2])^2))
+    MOE_average <- mean(subdata[, 3])
+    coverage_rate <- mean(subdata[, 6])
+    
+    summary_data <- rbind(summary_data, c(matching_method_vector[i], estimation_method_vector[m], 
+                                          mean_abs_error, root_MSE, MOE_average, coverage_rate))
+    
+  } 
+}
+
+summary_data[, -c(1, 2)] <- lapply(summary_data[, -c(1, 2)], as.numeric)
+summary_data[, 5] <- 2*summary_data[, 5]
+names(summary_data) <- c("Matching_Method", "Estimation_Method","Mean_Error", "RMSE", "Average_Length", "Coverage_Rate")
+
+write.csv(summary_data, "sim_pn_weight_summary.csv")
+
