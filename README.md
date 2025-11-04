@@ -25,17 +25,21 @@ Download the `Bias Reduction for Matching with Continuous Treatments Simulation 
 
 ### Results in Web Appendix C: More Details on the Simulations
 
-1) **Table S1** The results shown in Table S1 are attained by following the instructions for replication the results in Section 4 of the main manuscript.
+**Table S1** Download the `Bias Reduction for Matching with Continuous Treatments Simulation code.R` file, load the necessary libraries and functions, then run the `Appendix B` code chunk.
 
-2) **Table S2** Download the `Bias Reduction for Matching with Continuous Treatments Simulation code.R` file, load the necessary libraries and functions, then run the simulations in the Main Simulation section. Specifically, run the `Simulation 2 Estimation and Inference (Supplementary Materials)` chunk of code to replicate results shown in table S2 of the supplementary materials. You may run the `Simulation Result Tables` chunk of code to produce a LaTeX table showing the Bias, MCIL and CR results combined.
+### Results in Web Appendix C: More Details on the Simulations
 
-3) **Table S3** In the `Bias Reduction for Matching with Continuous Treatments Simulation code.R` file, after running the `Simulation 1 Estimation and Inference (MAE, RMSE, ML, CR)` and the `Simulation 2 Estimation and Inference (MAE, RMSE, ML, CR)` code chunks, run the `Covariate Balance Tables` code chunk to create the covariate balance tables for simulations 1 and 2 separately.
+1) **Table S2** The results shown in Table S2 are attained by following the instructions for replication the results in Section 4 of the main manuscript.
+
+2) **Table S3** Download the `Bias Reduction for Matching with Continuous Treatments Simulation code.R` file, load the necessary libraries and functions, then run the simulations in the Main Simulation section. Specifically, run the `Simulation 2 Estimation and Inference (Supplementary Materials)` chunk of code to replicate results shown in table S3 of the supplementary materials. You may run the `Simulation Result Tables` chunk of code to produce a LaTeX table showing the Bias, MCIL and CR results combined.
+
+3) **Table S4** In the `Bias Reduction for Matching with Continuous Treatments Simulation code.R` file, after running the `Simulation 1 Estimation and Inference (MAE, RMSE, ML, CR)` and the `Simulation 2 Estimation and Inference (MAE, RMSE, ML, CR)` code chunks, run the `Covariate Balance Tables` code chunk to create the covariate balance tables for simulations 1 and 2 separately.
 
 1) **Figures S1 and S2** In the `Bias Reduction for Matching with Continuous Treatments Simulation code.R` file, after running the `Simulation 1 Estimation and Inference (MAE, RMSE, ML, CR)` code chunk, run the `Simulation 1 P Distribution (supplementary materials)` code chunk to produce the .csv files containing the distribution of treatment assignment probabilities for simulation 1. To replicate figure S1, run the `P Distribution Plots` code chunk, which will create a histogram for whichever .csv file you chose to read into the plot object. Repeat these steps for the `Simulation 2 Estimation and Inference (Supplementary Materials)` and `Simulation 2 P Distribution (supplementary materials)` code chunks to replicate the results shown in figure S2.
 
 ### Results in Web Appendix D: More Details on the Data Application
 
-1) **Tables S4, S5 and S6** In the `Bias Mitigation in Matched Observational Studies Application Code.R` file, run the `Balance Table for Original Set of 1,211 Matched Pairs` code chunk to replicates the covariate balance table before non-bipartite matching (Table S4) and the covariate balance table with conventional non-bipartite matching (Table S5). Run the ``Balance Table, Calipered (xi = 0.075) Versus Original Set`` to replicate the covariate balance table for the matched pairs formed by dose assignment discrepancy caliper (Table S6).
+1) **Tables S5, S6 and S7** In the `Bias Mitigation in Matched Observational Studies Application Code.R` file, run the `Balance Table for Original Set of 1,211 Matched Pairs` code chunk to replicates the covariate balance table before non-bipartite matching (Table S5) and the covariate balance table with conventional non-bipartite matching (Table S6). Run the ``Balance Table, Calipered (xi = 0.075) Versus Original Set`` to replicate the covariate balance table for the matched pairs formed by dose assignment discrepancy caliper (Table S7).
 
 2) **Figure S3** In the `Bias Mitigation in Matched Observational Studies Application Code.R` file, run the ggplot code in the `Average Treatment Effect Estimation for Calipered (xi=0.075) Set of Matched Pairs` code chunk to replicate figure S3.
 
@@ -43,13 +47,13 @@ Download the `Bias Reduction for Matching with Continuous Treatments Simulation 
 
 ### Results in Web Appendix E: Effectiveness of the Bias Mitigation Framework Under Alternative Matching Schemes
 
-1) **Table S7** In the `Bias Reduction for Matching with Continuous Treatments Simulation code.R`, run the `Simulation E.1 Estimation and Inference (MAE, RMSE, ML, CR)` code chunk to replicate the results shown in Appendix E.1 of the supplementary materials.
+1) **Table S8** In the `Bias Reduction for Matching with Continuous Treatments Simulation code.R`, run the `Simulation E.1 Estimation and Inference (MAE, RMSE, ML, CR)` code chunk to replicate the results shown in Appendix E.1 of the supplementary materials.
 
-2) **Table S8** In the `Bias Reduction for Matching with Continuous Treatments Simulation code.R`, run the `Simulation E.2 Estimation and Inference (MAE, RMSE, ML, CR)` code chunk to replicate the results shown in Appendix E.2 of the supplementary materials.
+2) **Table S9** In the `Bias Reduction for Matching with Continuous Treatments Simulation code.R`, run the `Simulation E.2 Estimation and Inference (MAE, RMSE, ML, CR)` code chunk to replicate the results shown in Appendix E.2 of the supplementary materials.
 
 ### Results in Web Appendix G: More Details Regarding the Dose Assignment Discrepancy Caliper
 
-**Table S9** the covariate balance tables for all 8 matching schemes considered in Appendix G.3 are contained in the `Balance Tables for Appendix G.3` folder. Table S9 simply compiles the standardized difference-in-means from each of these 8 covariate balance tables.
+**Table S10** the covariate balance tables for all 8 matching schemes considered in Appendix G.3 are contained in the `Balance Tables for Appendix G.3` folder. Table S10 simply compiles the standardized difference-in-means from each of these 8 covariate balance tables.
 
 ## License
 Copyright 2025 Anthony Frazier, Siyu Heng, and Wen Zhou
